@@ -1,0 +1,49 @@
+# Secrets
+.env
+*.pem
+*.key
+
+# Runtime data (Forge's live state -- changes constantly, has credentials)
+data/credentials/
+data/identity/
+data/devices/
+data/agents/
+data/logs/
+data/memory/
+data/media/
+data/canvas/
+data/delivery-queue/
+data/cron/
+data/update-check.json
+data/openclaw.json
+data/openclaw.json.bak*
+
+# Forge's workspace (managed by Forge itself, too volatile for git)
+data/workspace/
+
+# Large binary assets (stored locally, not in git)
+*.mp4
+*.indd
+*.epub
+*.xlsx
+context/book/Final Files - Clarity/
+context/book/PAPERBACK_*.pdf
+context/business/gumroad-pricing-research.pdf
+context/business/BWL_Playbook/
+
+# Images (keep small ones, exclude large originals)
+context/forge-identity/forge-icon.png
+context/lucas/lucas-headshot.jpeg
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Docker
+logs/
+
+# Cloudflare
+dashboard/.wrangler/
+
+# Node
+node_modules/

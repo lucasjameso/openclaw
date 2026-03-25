@@ -1,0 +1,13 @@
+name = "forge-dashboard"
+main = "src/test-simple.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+account_id = "dae540d1c9880eb0d8fe720705f05080"
+
+[vars]
+DASHBOARD_VERSION = "0.2.0"
+
+# Custom domain route (add after DNS setup)
+# [[routes]]
+# pattern = "forge.iac-solutions.io/*"
+# custom_domain = true

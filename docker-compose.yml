@@ -1,0 +1,42 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - /Users/lucas/.ollama:/root/.ollama
+    ports:
+      - "127.0.0.1:11435:11434"
+
+  openclaw:
+    build: .
+    image: forge-openclaw:latest
+    container_name: openclaw
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "127.0.0.1:3000:18789"
+    env_file:
+      - .env
+    environment:
+      - OPENCLAW_AUTO_UPDATE=true
+      - OLLAMA_API_KEY=ollama-local
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
+      - CLOUDFLARE_ACCOUNT_ID=${CF_ACCOUNT_ID}
+    volumes:
+      - ./data:/home/node/.openclaw
+      - ./skills:/workspace/skills
+      - ./context:/workspace/context:ro
+      - ./scripts:/workspace/scripts
+      - ./dashboard:/workspace/dashboard
+      - /Users/lucas/.notebooklm-mcp-cli:/home/node/.notebooklm-mcp-cli:rw
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:18789/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+

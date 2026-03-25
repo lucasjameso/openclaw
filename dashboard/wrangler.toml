@@ -1,0 +1,7 @@
+name = "forge-dashboard"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+account_id = "dae540d1c9880eb0d8fe720705f05080"
+
+[vars]
+DASHBOARD_VERSION = "0.3.0"
