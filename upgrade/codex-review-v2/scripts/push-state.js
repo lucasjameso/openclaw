@@ -1440,8 +1440,7 @@ async function buildState() {
   const sessionJson = readJsonFile(PATHS.sessions, { sessions: [] });
   const tweetDrafts = readJsonFile(PATHS.tweetDrafts, { drafts: [] });
   const existingState = await readExistingState();
-  renderReviewHtmlArtifacts();
-  runReviewHtmlValidation();
+  // Review artifacts should already be rendered and validated by review-pipeline.js.
   const reviewScan = scanReviewDirectory(PATHS.reviewDir);
   const reviewState = await buildReviewState(reviewScan, existingState && !existingState.status ? existingState : null);
   const queue = buildQueueState(queueJson);
