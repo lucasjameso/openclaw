@@ -1,3 +1,6 @@
+import { renderSharedShellStyles, renderTopbar } from './shared/shell.js';
+import { renderReviewTokenDeclarations } from './shared/tokens.js';
+
 const reviewHtml = `<!doctype html>
 <html lang="en">
 <head>
@@ -43,6 +46,16 @@ const reviewHtml = `<!doctype html>
       --space-4: 16px;
       --space-5: 20px;
       --space-6: 24px;
+${renderReviewTokenDeclarations({
+  '--shell-max-width': '1520px',
+  '--shell-text-primary': 'var(--text-primary)',
+  '--shell-text-secondary': 'var(--text-secondary)',
+  '--shell-text-tertiary': 'var(--text-tertiary)',
+  '--shell-border': 'var(--border)',
+  '--shell-border-strong': 'var(--border-strong)',
+  '--shell-accent': 'var(--accent)',
+  '--shell-accent-strong': 'var(--accent)',
+})}
     }
 
     * { box-sizing: border-box; }
@@ -69,220 +82,7 @@ const reviewHtml = `<!doctype html>
       text-decoration: none;
     }
 
-    .app-shell {
-      min-height: 100vh;
-      max-width: 1520px;
-      margin: 0 auto;
-      padding: 16px 18px 18px;
-      display: grid;
-      grid-template-rows: auto auto auto;
-      align-content: start;
-      gap: 12px;
-      overflow: visible;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      isolation: isolate;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 18px;
-      align-items: center;
-      padding: 16px 18px;
-      background: linear-gradient(180deg, rgba(2, 7, 12, 0.98), rgba(7, 16, 25, 0.94));
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      backdrop-filter: blur(24px) saturate(1.28);
-      box-shadow:
-        0 28px 78px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-
-    .topbar::before {
-      content: "";
-      position: absolute;
-      inset: -58% -10% auto;
-      height: 210%;
-      border-radius: inherit;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(6, 10, 15, 0.96), transparent 72%),
-        linear-gradient(180deg, rgba(3, 7, 12, 0.94), rgba(3, 7, 12, 0));
-      filter: blur(34px);
-      opacity: 0.96;
-      pointer-events: none;
-      z-index: -2;
-    }
-
-    .topbar::after {
-      content: "";
-      position: absolute;
-      inset: 1px;
-      border-radius: inherit;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
-        radial-gradient(circle at 84% 0%, rgba(255, 158, 82, 0.12), transparent 24%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 0;
-    }
-
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 32% 34%, rgba(255, 164, 84, 0.46), transparent 36%),
-        linear-gradient(145deg, rgba(22, 35, 53, 0.98), rgba(6, 12, 19, 0.96));
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.12),
-        0 0 30px rgba(255, 138, 45, 0.12);
-      color: #f6f9fc;
-      font-weight: 700;
-      font-size: 20px;
-      letter-spacing: -0.06em;
-    }
-
-    .brand-copy {
-      min-width: 0;
-    }
-
-    .brand-kicker {
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 4px;
-      white-space: nowrap;
-    }
-
-    .brand-title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      white-space: nowrap;
-    }
-
-    .nav {
-      display: inline-flex;
-      justify-content: center;
-      gap: 8px;
-      padding: 6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05);
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .nav::-webkit-scrollbar {
-      display: none;
-    }
-
-    .nav a {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 11px 16px;
-      border-radius: 999px;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
-    }
-
-    .nav a:hover {
-      color: var(--text-primary);
-      background: rgba(255,255,255,0.04);
-      transform: translateY(-1px);
-    }
-
-    .nav a.active {
-      color: white;
-      background: linear-gradient(135deg, rgba(106, 179, 255, 0.2), rgba(255, 138, 45, 0.12));
-      border: 1px solid rgba(149, 206, 255, 0.18);
-    }
-
-    .topbar-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .heartbeat-strip {
-      width: 160px;
-      height: 38px;
-      display: grid;
-      grid-template-columns: repeat(20, minmax(0, 1fr));
-      gap: 3px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.03);
-      overflow: hidden;
-    }
-
-    .heartbeat-strip span {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
-      transform-origin: bottom center;
-      animation: beat 1.7s ease-in-out infinite;
-      animation-delay: calc(var(--i) * 70ms);
-    }
-
-    .heartbeat-strip.active span {
-      background: linear-gradient(180deg, rgba(105, 200, 255, 0.95), rgba(255, 138, 45, 0.5));
-      box-shadow: 0 0 14px rgba(105, 200, 255, 0.16);
-    }
-
-    .heartbeat-strip.blocked span {
-      background: linear-gradient(180deg, rgba(255, 177, 68, 0.95), rgba(255, 107, 122, 0.52));
-      box-shadow: 0 0 14px rgba(255, 107, 122, 0.16);
-    }
-
-    .clock,
-    .sync-chip {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.03);
-      white-space: nowrap;
-      font-size: 13px;
-    }
-
-    .clock {
-      font-weight: 600;
-      color: var(--text-primary);
-      font-variant-numeric: tabular-nums;
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-    }
-
-    .sync-chip {
-      color: var(--text-secondary);
-    }
-
-    .sync-chip strong {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
+${renderSharedShellStyles()}
 
     .token-wrap {
       display: grid;
@@ -1395,27 +1195,13 @@ const reviewHtml = `<!doctype html>
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">F</div>
-        <div class="brand-copy">
-          <div class="brand-kicker">Autonomous Business Operating System</div>
-          <div class="brand-title">Forge Command</div>
-        </div>
-      </div>
-      <nav class="nav" aria-label="Primary">
-        <a href="/"><i class="fa-solid fa-satellite-dish"></i> Command</a>
-        <a class="active" href="/review"><i class="fa-solid fa-shield-halved"></i> Review</a>
-        <a href="/x-posts"><i class="fa-brands fa-x-twitter"></i> Broadcast</a>
-        <a href="/story"><i class="fa-solid fa-timeline"></i> Story</a>
-        <a href="/launchpad"><i class="fa-solid fa-rocket"></i> Launch</a>
-      </nav>
-      <div class="topbar-meta">
-        <div class="heartbeat-strip" id="topbar-heartbeat"></div>
-        <div id="live-clock" class="clock">--:--:-- ET</div>
-        <div class="sync-chip" id="topbar-sync-chip"><strong>Awaiting sync</strong></div>
-      </div>
-    </header>
+${renderTopbar({
+  title: 'Forge Command',
+  activePath: '/review',
+  heartbeatId: 'topbar-heartbeat',
+  clockId: 'live-clock',
+  syncId: 'topbar-sync-chip',
+})}
 
     <main class="main-grid">
       <section class="panel queue-panel">
