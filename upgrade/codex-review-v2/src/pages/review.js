@@ -1720,7 +1720,7 @@ const reviewHtml = `<!doctype html>
         if (item.type === 'pdf') {
           surface.innerHTML = '<iframe class="preview-frame" src="' + item.preview_url + '#view=FitH"></iframe>';
         } else {
-          surface.innerHTML = '<iframe class="preview-frame" sandbox="allow-same-origin allow-scripts" src="' + item.preview_url + '"></iframe>';
+          surface.innerHTML = '<iframe class="preview-frame" sandbox="allow-scripts" src="' + item.preview_url + '"></iframe>';
         }
         return;
       }
@@ -1729,7 +1729,7 @@ const reviewHtml = `<!doctype html>
         if (item.type === 'pdf') {
           surface.innerHTML = '<iframe class="preview-frame" src="' + item.preview_url + '#view=FitH"></iframe>';
         } else {
-          surface.innerHTML = '<iframe class="preview-frame" sandbox="allow-same-origin allow-scripts" src="' + item.preview_url + '"></iframe>';
+          surface.innerHTML = '<iframe class="preview-frame" sandbox="allow-scripts" src="' + item.preview_url + '"></iframe>';
         }
         return;
       }
