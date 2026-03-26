@@ -93,13 +93,14 @@ const missionControlHtml = `<!doctype html>
       gap: 18px;
       align-items: center;
       padding: 16px 18px;
-      margin-bottom: 14px;
+      margin-bottom: 20px;
       background: linear-gradient(180deg, rgba(2, 7, 12, 0.98), rgba(7, 16, 25, 0.94));
       border: 1px solid var(--border);
       border-radius: 999px;
       backdrop-filter: blur(24px) saturate(1.28);
       box-shadow:
         0 28px 78px rgba(0, 0, 0, 0.5),
+        0 1px 0 rgba(106, 179, 255, 0.06),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
@@ -310,7 +311,7 @@ const missionControlHtml = `<!doctype html>
       grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
       gap: 20px;
       padding: 30px;
-      margin-bottom: 18px;
+      margin-bottom: 28px;
       background:
         radial-gradient(circle at 12% 18%, rgba(106, 179, 255, 0.12), transparent 28%),
         radial-gradient(circle at 88% 12%, rgba(255, 138, 45, 0.14), transparent 24%),
@@ -517,7 +518,7 @@ const missionControlHtml = `<!doctype html>
       border-radius: var(--radius-lg);
       background: rgba(10, 18, 28, 0.84);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.24);
       overflow: hidden;
     }
 
@@ -605,7 +606,7 @@ const missionControlHtml = `<!doctype html>
       border-radius: var(--radius-xl);
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
       overflow: hidden;
     }
 
@@ -745,7 +746,7 @@ const missionControlHtml = `<!doctype html>
       background:
         linear-gradient(145deg, rgba(10, 18, 28, 0.94), rgba(6, 13, 20, 0.94));
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 22px 64px rgba(0, 0, 0, 0.34);
     }
 
     .live-card.active {
