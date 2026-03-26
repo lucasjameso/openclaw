@@ -1,0 +1,12 @@
+{
+  "name": "codex-review-v2-tooling",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tooling for Forge dashboard capture and deploy support",
+  "scripts": {
+    "capture:dashboard": "node scripts/capture-dashboard.js"
+  },
+  "dependencies": {
+    "puppeteer": "^24.40.0"
+  }
+}
