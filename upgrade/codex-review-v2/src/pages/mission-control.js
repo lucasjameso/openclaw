@@ -509,6 +509,7 @@ const missionControlHtml = `<!doctype html>
     }
 
     .metric-card {
+      position: relative;
       padding: 18px 18px 20px;
       border-radius: var(--radius-lg);
       background: rgba(10, 18, 28, 0.84);
