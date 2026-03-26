@@ -71,6 +71,21 @@ const FORMAT_PRIORITY = {
   webp: 5,
 };
 
+const CLI_ARGS = process.argv.slice(2);
+const DRY_RUN = CLI_ARGS.includes('--dry-run');
+
+function getArgValue(name) {
+  const index = CLI_ARGS.indexOf(name);
+  if (index === -1 || index === CLI_ARGS.length - 1) {
+    return null;
+  }
+  return CLI_ARGS[index + 1];
+}
+
+const STATE_OUT_PATH = getArgValue('--state-out')
+  ? path.resolve(process.cwd(), getArgValue('--state-out'))
+  : null;
+
 function readJsonFile(filePath, fallback) {
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -948,6 +963,10 @@ async function generateDerivative(buffer, extension) {
 }
 
 function uploadPreviewRaw(previewPath, buffer, mime, artifactHash, dimensions) {
+  if (!DASHBOARD_API_URL || !DASHBOARD_API_TOKEN) {
+    return Promise.reject(new Error('Preview upload requires DASHBOARD_API_URL and DASHBOARD_API_TOKEN.'));
+  }
+
   const url = DASHBOARD_API_URL.replace(/\/$/, '') + '/api/preview/' + encodeURIComponent(previewPath);
   const headers = {
     'Content-Type': 'application/octet-stream',
@@ -985,6 +1004,10 @@ function uploadPreviewRaw(previewPath, buffer, mime, artifactHash, dimensions) {
 }
 
 function readExistingState() {
+  if (!DASHBOARD_API_URL) {
+    return Promise.resolve(null);
+  }
+
   return requestJson(DASHBOARD_API_URL.replace(/\/$/, '') + '/api/state', {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
@@ -1306,7 +1329,7 @@ async function buildReviewState(scanResult, existingState) {
       });
     } else if (isLargeImage) {
       let uploaded = false;
-      if (hashes[relativePath] !== artifactHash) {
+      if (!DRY_RUN && hashes[relativePath] !== artifactHash) {
         const derivative = await generateDerivative(buffer, extension);
         if (derivative) {
           try {
@@ -1318,7 +1341,7 @@ async function buildReviewState(scanResult, existingState) {
             uploaded = false;
           }
         }
-      } else {
+      } else if (!DRY_RUN) {
         uploaded = true;
       }
 
@@ -1353,7 +1376,7 @@ async function buildReviewState(scanResult, existingState) {
       });
     } else if (canDirectUploadIframe) {
       let uploaded = false;
-      if (hashes[relativePath] !== artifactHash) {
+      if (!DRY_RUN && hashes[relativePath] !== artifactHash) {
         try {
           await uploadPreviewRaw(
             relativePath,
@@ -1373,7 +1396,7 @@ async function buildReviewState(scanResult, existingState) {
         } catch (error) {
           uploaded = false;
         }
-      } else {
+      } else if (!DRY_RUN) {
         uploaded = true;
       }
 
@@ -1408,7 +1431,9 @@ async function buildReviewState(scanResult, existingState) {
     return nextItem;
   });
   processedItems.sort((a, b) => String(b.modified_at).localeCompare(String(a.modified_at)));
-  savePreviewHashes(nextHashes);
+  if (!DRY_RUN) {
+    savePreviewHashes(nextHashes);
+  }
 
   const metadata = {};
   for (const item of processedItems) {
@@ -1495,11 +1520,28 @@ async function pushState(payload) {
 }
 
 async function main() {
-  if (!DASHBOARD_API_URL || !DASHBOARD_API_TOKEN) {
+  if (!DRY_RUN && (!DASHBOARD_API_URL || !DASHBOARD_API_TOKEN)) {
     throw new Error('DASHBOARD_API_URL and DASHBOARD_API_TOKEN are required.');
   }
 
   const payload = await buildState();
+  if (STATE_OUT_PATH) {
+    writeJsonFile(STATE_OUT_PATH, payload);
+  }
+
+  if (DRY_RUN) {
+    console.log(JSON.stringify({
+      status: 'dry-run',
+      builtAt: payload.state.lastUpdated,
+      queueTasks: payload.state.queue.tasks.length,
+      reviews: payload.state.reviews.items.length,
+      previewsPrepared: payload.previewPayloads.length,
+      largePreviewsPrepared: payload.largePreviewUploads.length,
+      stateOut: STATE_OUT_PATH,
+    }, null, 2));
+    return;
+  }
+
   const result = await pushState(payload);
 
   console.log(JSON.stringify({
@@ -1510,6 +1552,7 @@ async function main() {
     previewsSynced: payload.previewPayloads.length,
     largePreviewsUploaded: payload.largePreviewUploads.length,
     largePreviewDetails: payload.largePreviewUploads,
+    stateOut: STATE_OUT_PATH,
     response: result,
   }, null, 2));
 }
