@@ -12,12 +12,20 @@ function corsHeaders(extraHeaders = {}) {
   };
 }
 
+function freshHeaders(extraHeaders = {}) {
+  return corsHeaders({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0, s-maxage=0',
+    Pragma: 'no-cache',
+    Expires: '0',
+    ...extraHeaders,
+  });
+}
+
 function jsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload, null, 2), {
     status,
-    headers: corsHeaders({
+    headers: freshHeaders({
       'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
     }),
   });
 }
@@ -197,6 +205,9 @@ export async function handleCreateReviewEvent(request, env) {
     item_id: String(body.item_id),
     item_path: typeof body.item_path === 'string' && body.item_path ? body.item_path : item.path || '',
     item_type: typeof body.item_type === 'string' && body.item_type ? body.item_type : item.type || '',
+    review_content_type: typeof body.review_content_type === 'string' && body.review_content_type
+      ? body.review_content_type
+      : item.review_content_type || item.type || '',
     artifact_category: typeof body.artifact_category === 'string' && body.artifact_category ? body.artifact_category : item.artifact_category || item.category || 'product',
     decision: body.decision,
     issues: normalizeIssues(body.issues),

@@ -8,6 +8,22 @@ const https = require('https');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
+// Load .env if DEEPSEEK_API_KEY not already set.
+if (!process.env.DEEPSEEK_API_KEY) {
+  try {
+    const envPath = path.join(__dirname, '../../../.env');
+    const envLines = fs.readFileSync(envPath, 'utf8').split('\n');
+    envLines.forEach((line) => {
+      const match = line.match(/^([A-Z_]+)=(.+)$/);
+      if (match && !process.env[match[1]]) {
+        process.env[match[1]] = match[2].trim();
+      }
+    });
+  } catch (error) {
+    // Cron-safe fallback: keep going even if the env file is unavailable.
+  }
+}
+
 let sharp;
 try {
   sharp = require('sharp');
@@ -24,7 +40,6 @@ const DERIVATIVE_JPEG_QUALITY = 82;
 
 const DASHBOARD_API_URL = process.env.DASHBOARD_API_URL;
 const DASHBOARD_API_TOKEN = process.env.DASHBOARD_API_TOKEN;
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const FORGE_MODEL = process.env.FORGE_MODEL || 'deepseek-chat';
 const WORKSPACE = process.env.OPENCLAW_WORKSPACE ||
   (fs.existsSync('/home/node/.openclaw/workspace') ? '/home/node/.openclaw/workspace' : path.join(__dirname, '../../../data/workspace'));
@@ -36,14 +51,16 @@ const PATHS = {
   postedLog: path.join(WORKSPACE, 'content/x/posted-log.md'),
   reviewDir: path.join(WORKSPACE, 'review'),
   previewHashes: path.join(WORKSPACE, 'data/preview-hashes.json'),
+  renderValidationReport: path.join(WORKSPACE, 'data/render-validation-report.json'),
 };
 
 const INLINE_IMAGE_MAX_BYTES = 400000;
 const PDF_MAX_BYTES = 2000000;
 const HTML_MAX_BYTES = 500000;
 const DIRECT_EMBED_MAX_BYTES = 24 * 1024 * 1024;
-const REVIEWABLE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.pdf', '.html']);
-const METADATA_EXTENSIONS = new Set(['.md', '.json', '.txt', '.log']);
+const REVIEWABLE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.pdf', '.html', '.md']);
+const METADATA_EXTENSIONS = new Set(['.json', '.txt', '.log']);
+const REVIEW_EXCLUDED_DIRECTORIES = new Set(['archived-forge-content']);
 const COLLAPSIBLE_SUFFIXES = ['-optimized', '-compressed', '-social', '-v2', '-v3', '-fixed', '-final', '-draft'];
 const FORMAT_PRIORITY = {
   pdf: 1,
@@ -201,9 +218,98 @@ function mimeTypeForExtension(extension) {
       return 'application/pdf';
     case '.html':
       return 'text/html; charset=utf-8';
+    case '.md':
+      return 'text/markdown; charset=utf-8';
     default:
       return 'application/octet-stream';
   }
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function parseFrontmatter(text) {
+  const input = String(text || '');
+  if (!input.startsWith('---\n')) {
+    return { attributes: {}, body: input };
+  }
+
+  const closingIndex = input.indexOf('\n---', 4);
+  if (closingIndex === -1) {
+    return { attributes: {}, body: input };
+  }
+
+  const rawFrontmatter = input.slice(4, closingIndex).split('\n');
+  const attributes = {};
+  for (const line of rawFrontmatter) {
+    const separatorIndex = line.indexOf(':');
+    if (separatorIndex === -1) {
+      continue;
+    }
+    const key = line.slice(0, separatorIndex).trim();
+    const rawValue = line.slice(separatorIndex + 1).trim();
+    attributes[key] = rawValue.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+  }
+
+  return {
+    attributes,
+    body: input.slice(closingIndex + 4).replace(/^\n+/, ''),
+  };
+}
+
+function normalizedCompareText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function stripDuplicateMarkdownHeading(title, body) {
+  const text = String(body || '').replace(/^\s+/, '');
+  const match = text.match(/^#\s+([^\n]+)\n*/);
+  if (!match) {
+    return text;
+  }
+
+  const heading = normalizedCompareText(match[1]);
+  const target = normalizedCompareText(title);
+  if (!heading || !target) {
+    return text;
+  }
+
+  if (heading === target || heading.includes(target) || target.includes(heading)) {
+    return text.slice(match[0].length).replace(/^\s+/, '');
+  }
+
+  return text;
+}
+
+function renderMarkdownPreview(title, body) {
+  const cleanedBody = stripDuplicateMarkdownHeading(title, body);
+  return [
+    '<!doctype html>',
+    '<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">',
+    `<title>${escapeHtml(title || 'Review copy')}</title>`,
+    '<style>',
+    'html,body{height:100%;margin:0;}',
+    'body{background:radial-gradient(circle at top left, rgba(105,167,255,0.12), transparent 26%),radial-gradient(circle at top right, rgba(255,177,68,0.12), transparent 22%),linear-gradient(180deg,#061018 0%,#09131d 100%);color:#eff4fb;font-family:"Space Grotesk","Segoe UI",sans-serif;}',
+    'main{min-height:100%;padding:24px;display:grid;}',
+    '.shell{max-width:980px;width:100%;margin:0 auto;padding:28px 30px 34px;border-radius:26px;background:linear-gradient(180deg,rgba(16,26,36,0.96),rgba(12,20,29,0.98));border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 72px rgba(0,0,0,0.28);min-height:calc(100vh - 48px);display:grid;align-content:start;gap:18px;}',
+    '.eyebrow{font:700 11px/1 "IBM Plex Mono","SFMono-Regular",monospace;letter-spacing:0.14em;text-transform:uppercase;color:#7fb5ff;}',
+    'h1{font:700 clamp(30px,4vw,44px)/0.98 "Space Grotesk","Segoe UI",sans-serif;letter-spacing:-0.05em;margin:0;}',
+    '.content{white-space:pre-wrap;word-break:break-word;font:500 17px/1.72 "Space Grotesk","Segoe UI",sans-serif;color:#dce7f5;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);}',
+    '</style></head><body><main><div class="shell">',
+    '<div class="eyebrow">Review Preview</div>',
+    `<h1>${escapeHtml(title || 'Review copy')}</h1>`,
+    `<div class="content">${escapeHtml(cleanedBody || '')}</div>`,
+    '</div></main></body></html>',
+  ].join('');
 }
 
 function categoryForPath(filePath) {
@@ -212,6 +318,20 @@ function categoryForPath(filePath) {
   if (lower.includes('dashboard')) return 'dashboard';
   if (/\.(png|jpg|jpeg|webp)$/i.test(lower) || lower.includes('visual')) return 'visuals';
   return 'product';
+}
+
+function deriveReviewContentType(item, metadata) {
+  if (metadata && metadata.__frontmatter__ && metadata.__frontmatter__.content && typeof metadata.__frontmatter__.content.type === 'string') {
+    return metadata.__frontmatter__.content.type;
+  }
+
+  for (const entry of Object.values(metadata || {})) {
+    if (entry && entry.content && typeof entry.content.type === 'string') {
+      return entry.content.type;
+    }
+  }
+
+  return item.type || 'unknown';
 }
 
 function normalizedStemName(filename) {
@@ -409,6 +529,81 @@ function buildNextSession(schedule) {
     name: upcoming.name,
     in: relativeEtCountdown(upcoming.nextRun),
   };
+}
+
+function runReviewHtmlValidation() {
+  const validatorPath = path.join(__dirname, 'validate-review-html.js');
+  const result = spawnSync(process.execPath, [validatorPath], {
+    encoding: 'utf8',
+    timeout: 20000,
+    env: {
+      ...process.env,
+      OPENCLAW_WORKSPACE: WORKSPACE,
+    },
+  });
+
+  const stdout = String(result.stdout || '').trim();
+  const stderr = String(result.stderr || '').trim();
+  const report = readJsonFile(PATHS.renderValidationReport, null);
+  const summary = report && report.summary ? report.summary : null;
+
+  if (stdout) {
+    console.log(stdout);
+  }
+  if (stderr) {
+    console.error(stderr);
+  }
+
+  if (result.error) {
+    console.error('[review-html-validation] validator failed to execute:', result.error.message);
+    return { status: 1, summary, report };
+  }
+
+  if (result.status !== 0) {
+    console.error('[review-html-validation] blank review HTML detected. Continuing push so non-review content is not blocked.');
+    if (summary) {
+      console.error(`[review-html-validation] summary: ${summary.ok} ok | ${summary.blank} blank | ${summary.unknownTypes} unknown types`);
+    }
+  }
+
+  return {
+    status: result.status || 0,
+    summary,
+    report,
+  };
+}
+
+function renderReviewHtmlArtifacts() {
+  const rendererPath = path.join(__dirname, 'render-review-to-html.js');
+  const result = spawnSync(process.execPath, [rendererPath], {
+    encoding: 'utf8',
+    timeout: 30000,
+    env: {
+      ...process.env,
+      OPENCLAW_WORKSPACE: WORKSPACE,
+    },
+  });
+
+  const stdout = String(result.stdout || '').trim();
+  const stderr = String(result.stderr || '').trim();
+
+  if (stdout) {
+    console.log(stdout);
+  }
+  if (stderr) {
+    console.error(stderr);
+  }
+
+  if (result.error) {
+    console.error('[review-html-render] renderer failed to execute:', result.error.message);
+    return { status: 1 };
+  }
+
+  if (result.status !== 0) {
+    console.error('[review-html-render] renderer exited non-zero. Continuing with current review state.');
+  }
+
+  return { status: result.status || 0 };
 }
 
 function percentEncode(value) {
@@ -698,14 +893,15 @@ async function buildXPostsState(tweetDrafts, queueTasks) {
 }
 
 async function fetchDeepSeekBalance() {
-  if (!DEEPSEEK_API_KEY) {
+  const apiKey = process.env.DEEPSEEK_API_KEY || '';
+  if (!apiKey) {
     return { balance: 0, status: 'offline' };
   }
 
   try {
     const payload = await requestJson('https://api.deepseek.com/user/balance', {
       method: 'GET',
-      headers: { Authorization: 'Bearer ' + DEEPSEEK_API_KEY },
+      headers: { Authorization: 'Bearer ' + apiKey },
     });
 
     const info = Array.isArray(payload && payload.balance_infos) ? payload.balance_infos : [];
@@ -810,6 +1006,9 @@ function scanReviewDirectory(dirPath) {
     for (const entry of entries) {
       const fullPath = path.join(currentDir, entry.name);
       if (entry.isDirectory()) {
+        if (REVIEW_EXCLUDED_DIRECTORIES.has(entry.name)) {
+          continue;
+        }
         visit(fullPath);
         continue;
       }
@@ -1018,6 +1217,14 @@ async function buildReviewState(scanResult, existingState) {
     const buffer = fs.readFileSync(item.absolute_path);
     const artifactHash = sha256(buffer);
     const mime = mimeTypeForExtension(extension);
+    const markdownText = extension === '.md' ? buffer.toString('utf8') : '';
+    const markdownParsed = extension === '.md' ? parseFrontmatter(markdownText) : null;
+    const markdownPreviewHtml = extension === '.md'
+      ? renderMarkdownPreview(
+          markdownParsed.attributes.title || item.name,
+          markdownParsed.body
+        )
+      : null;
     const isImage = IMAGE_EXTENSIONS.includes(extension);
     const isSmallImage = isImage && buffer.length < INLINE_IMAGE_MAX_BYTES;
     const isLargeImage = isImage && buffer.length >= INLINE_IMAGE_MAX_BYTES;
@@ -1025,8 +1232,18 @@ async function buildReviewState(scanResult, existingState) {
       ? buffer.length < PDF_MAX_BYTES
       : extension === '.html'
         ? buffer.length < HTML_MAX_BYTES
+        : extension === '.md'
+          ? Buffer.byteLength(markdownPreviewHtml || '', 'utf8') < HTML_MAX_BYTES
         : false;
-    const canDirectUploadIframe = (extension === '.pdf' || extension === '.html') && buffer.length <= DIRECT_EMBED_MAX_BYTES;
+    const canDirectUploadIframe = (
+      extension === '.pdf' ||
+      extension === '.html' ||
+      extension === '.md'
+    ) && (
+      extension === '.md'
+        ? Buffer.byteLength(markdownPreviewHtml || '', 'utf8') <= DIRECT_EMBED_MAX_BYTES
+        : buffer.length <= DIRECT_EMBED_MAX_BYTES
+    );
     const dimensions = deriveArtifactDimensions(extension, buffer);
     const relativePath = item.path;
 
@@ -1041,11 +1258,30 @@ async function buildReviewState(scanResult, existingState) {
       return accumulator;
     }, {});
 
+    if (extension === '.md' && markdownParsed) {
+      itemMetadata.__frontmatter__ = {
+        type: 'frontmatter',
+        size: humanFileSize(Buffer.byteLength(JSON.stringify(markdownParsed.attributes), 'utf8')),
+        modified_at: item.modified_at,
+        content: markdownParsed.attributes,
+      };
+      itemMetadata.__markdown_body__ = {
+        type: 'markdown',
+        size: humanFileSize(Buffer.byteLength(markdownParsed.body || '', 'utf8')),
+        modified_at: item.modified_at,
+        content: markdownParsed.body || '',
+      };
+    }
+
     const commonFields = {
       ...item,
+      name: extension === '.md' && markdownParsed && markdownParsed.attributes.title
+        ? markdownParsed.attributes.title
+        : item.name,
       artifact_hash: artifactHash,
       artifact_dimensions: dimensions,
       metadata: itemMetadata,
+      review_content_type: deriveReviewContentType(item, itemMetadata),
       absolute_path: undefined,
       directory_key: path.dirname(relativePath),
       family_key: normalizedStemName(path.basename(relativePath, extension)),
@@ -1099,7 +1335,13 @@ async function buildReviewState(scanResult, existingState) {
       }
     } else if (shouldInlineIframe) {
       if (hashes[relativePath] !== artifactHash) {
-        previewPayloads.push({ path: relativePath, mime, data: buffer.toString('base64') });
+        previewPayloads.push({
+          path: relativePath,
+          mime: extension === '.md' ? 'text/html; charset=utf-8' : mime,
+          data: extension === '.md'
+            ? Buffer.from(markdownPreviewHtml || '', 'utf8').toString('base64')
+            : buffer.toString('base64'),
+        });
         nextHashes[relativePath] = artifactHash;
       }
       scannedItems.push({
@@ -1113,13 +1355,19 @@ async function buildReviewState(scanResult, existingState) {
       let uploaded = false;
       if (hashes[relativePath] !== artifactHash) {
         try {
-          await uploadPreviewRaw(relativePath, buffer, mime, artifactHash, dimensions);
+          await uploadPreviewRaw(
+            relativePath,
+            extension === '.md' ? Buffer.from(markdownPreviewHtml || '', 'utf8') : buffer,
+            extension === '.md' ? 'text/html; charset=utf-8' : mime,
+            artifactHash,
+            dimensions
+          );
           nextHashes[relativePath] = artifactHash;
           uploaded = true;
           largePreviewUploads.push({
             path: relativePath,
             originalSize: buffer.length,
-            derivativeSize: buffer.length,
+            derivativeSize: extension === '.md' ? Buffer.byteLength(markdownPreviewHtml || '', 'utf8') : buffer.length,
             kind: extension === '.pdf' ? 'pdf' : 'html',
           });
         } catch (error) {
@@ -1192,6 +1440,8 @@ async function buildState() {
   const sessionJson = readJsonFile(PATHS.sessions, { sessions: [] });
   const tweetDrafts = readJsonFile(PATHS.tweetDrafts, { drafts: [] });
   const existingState = await readExistingState();
+  renderReviewHtmlArtifacts();
+  runReviewHtmlValidation();
   const reviewScan = scanReviewDirectory(PATHS.reviewDir);
   const reviewState = await buildReviewState(reviewScan, existingState && !existingState.status ? existingState : null);
   const queue = buildQueueState(queueJson);

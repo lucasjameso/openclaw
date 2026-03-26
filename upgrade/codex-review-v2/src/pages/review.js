@@ -35,6 +35,7 @@ const reviewHtml = `<!doctype html>
       --radius-control: 14px;
       --panel-queue: 280px;
       --panel-inspector: 360px;
+      --workspace-height: 1060px;
       --nav-height: 86px;
       --space-1: 4px;
       --space-2: 8px;
@@ -56,6 +57,7 @@ const reviewHtml = `<!doctype html>
       color: var(--text-primary);
       font-family: "Space Grotesk", "Segoe UI", sans-serif;
       -webkit-font-smoothing: antialiased;
+      overflow: auto;
     }
 
     button, input, textarea {
@@ -71,10 +73,12 @@ const reviewHtml = `<!doctype html>
       min-height: 100vh;
       max-width: 1520px;
       margin: 0 auto;
-      padding: 24px 24px 28px;
+      padding: 16px 18px 18px;
       display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: var(--space-4);
+      grid-template-rows: auto auto auto;
+      align-content: start;
+      gap: 12px;
+      overflow: visible;
     }
 
     .topbar {
@@ -308,8 +312,12 @@ const reviewHtml = `<!doctype html>
       display: grid;
       grid-template-columns: var(--panel-queue) minmax(0, 1fr) var(--panel-inspector);
       gap: var(--space-4);
-      padding: var(--space-4);
-      min-height: 0;
+      padding: 12px;
+      height: var(--workspace-height);
+      min-height: var(--workspace-height);
+      max-height: var(--workspace-height);
+      align-items: stretch;
+      align-self: start;
     }
 
     .panel {
@@ -324,12 +332,24 @@ const reviewHtml = `<!doctype html>
 
     .queue-panel, .preview-panel, .inspector-panel {
       display: grid;
-      grid-template-rows: auto auto 1fr;
+      min-height: 0;
+    }
+
+    .queue-panel {
+      grid-template-rows: auto auto auto auto minmax(0, 1fr);
     }
 
     .preview-panel {
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
       background: var(--bg-preview);
+    }
+
+    .preview-panel.has-context {
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .inspector-panel {
+      grid-template-rows: auto minmax(0, 1fr);
     }
 
     .panel-header {
@@ -337,20 +357,20 @@ const reviewHtml = `<!doctype html>
       align-items: center;
       justify-content: space-between;
       gap: var(--space-3);
-      padding: var(--space-4);
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       background: var(--bg-panel);
     }
 
     .panel-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       letter-spacing: -0.01em;
     }
 
     .panel-subtle {
       color: var(--text-tertiary);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
     }
 
@@ -359,10 +379,16 @@ const reviewHtml = `<!doctype html>
       grid-template-columns: repeat(4, minmax(0, 1fr));
       border-bottom: 1px solid var(--border);
       background: var(--bg-panel);
+      text-align: center;
     }
 
     .stat-cell {
-      padding: var(--space-3) var(--space-4);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 6px;
+      min-height: 74px;
+      padding: 10px 8px 9px;
       border-right: 1px solid var(--border);
     }
 
@@ -371,25 +397,30 @@ const reviewHtml = `<!doctype html>
     }
 
     .stat-label {
-      font-size: 11px;
+      width: 100%;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 9px;
       font-weight: 600;
       color: var(--text-tertiary);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: var(--space-1);
+      letter-spacing: 0.04em;
+      margin-bottom: 0;
+      line-height: 1.05;
+      white-space: nowrap;
+      text-align: center;
     }
 
     .stat-value {
-      font-size: 24px;
+      font-size: 21px;
       font-weight: 700;
-      line-height: 1.1;
+      line-height: 1;
       letter-spacing: -0.03em;
     }
 
     .queue-progress {
       display: grid;
-      gap: 10px;
-      padding: 14px var(--space-4);
+      gap: 8px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
     }
@@ -399,7 +430,7 @@ const reviewHtml = `<!doctype html>
       justify-content: space-between;
       gap: var(--space-3);
       align-items: center;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -407,14 +438,14 @@ const reviewHtml = `<!doctype html>
 
     .queue-progress-copy strong {
       color: var(--text-primary);
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: normal;
       text-transform: none;
     }
 
     .queue-progress-track {
       width: 100%;
-      height: 8px;
+      height: 7px;
       border-radius: 999px;
       overflow: hidden;
       background: rgba(255,255,255,0.06);
@@ -431,11 +462,11 @@ const reviewHtml = `<!doctype html>
     }
 
     .filters {
-      padding: var(--space-4);
+      padding: 10px 12px;
       border-bottom: 1px solid var(--border);
       background: var(--bg-panel);
       display: grid;
-      gap: var(--space-3);
+      gap: 10px;
     }
 
     .filter-row {
@@ -449,8 +480,8 @@ const reviewHtml = `<!doctype html>
       background: var(--bg-panel);
       color: var(--text-secondary);
       border-radius: var(--radius-control);
-      padding: 7px 10px;
-      font-size: 12px;
+      padding: 6px 10px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
@@ -477,15 +508,15 @@ const reviewHtml = `<!doctype html>
     }
 
     .search-input {
-      padding: 10px 12px;
-      font-size: 13px;
+      padding: 9px 11px;
+      font-size: 12px;
     }
 
     .comment-box {
-      min-height: 96px;
+      min-height: 88px;
       resize: vertical;
       padding: 10px 12px;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.5;
     }
 
@@ -497,15 +528,17 @@ const reviewHtml = `<!doctype html>
       min-height: 0;
       overflow: auto;
       background: var(--bg-panel);
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
     }
 
     .queue-item {
       width: 100%;
       display: grid;
-      grid-template-columns: 40px 1fr auto;
-      gap: var(--space-3);
+      grid-template-columns: 34px 1fr auto;
+      gap: 10px;
       align-items: center;
-      padding: var(--space-3) var(--space-4);
+      padding: 10px 12px;
       border: none;
       border-left: 3px solid transparent;
       border-bottom: 1px solid var(--border);
@@ -530,9 +563,9 @@ const reviewHtml = `<!doctype html>
     }
 
     .queue-thumb, .queue-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--bg-muted);
@@ -551,9 +584,9 @@ const reviewHtml = `<!doctype html>
     }
 
     .queue-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      line-height: 1.35;
+      line-height: 1.28;
       color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
@@ -563,18 +596,18 @@ const reviewHtml = `<!doctype html>
     .queue-meta {
       display: flex;
       align-items: center;
-      gap: var(--space-2);
-      margin-top: var(--space-1);
+      gap: 6px;
+      margin-top: 4px;
       flex-wrap: wrap;
     }
 
     .tiny-badge, .revision-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       border-radius: 999px;
-      padding: 3px 8px;
-      font-size: 11px;
+      padding: 2px 7px;
+      font-size: 10px;
       font-weight: 600;
     }
 
@@ -605,9 +638,61 @@ const reviewHtml = `<!doctype html>
       align-items: center;
       justify-content: space-between;
       gap: var(--space-3);
-      padding: var(--space-4);
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       background: rgba(6, 14, 22, 0.72);
+    }
+
+    .preview-context-bar {
+      display: none;
+      gap: var(--space-3);
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(10, 20, 31, 0.94), rgba(7, 16, 25, 0.86));
+    }
+
+    .preview-context-bar.active {
+      display: grid;
+    }
+
+    .preview-context-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-2);
+    }
+
+    .preview-context-chip {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 8px 10px;
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .preview-context-chip span:first-child {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+    }
+
+    .preview-context-chip span:last-child {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-context-actions {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      align-items: center;
     }
 
     .preview-toolbar-actions {
@@ -621,8 +706,8 @@ const reviewHtml = `<!doctype html>
     .preview-canvas {
       min-height: 0;
       display: grid;
-      place-items: center;
-      padding: var(--space-5);
+      place-items: stretch;
+      padding: 12px;
       position: relative;
       overflow: hidden;
     }
@@ -653,9 +738,9 @@ const reviewHtml = `<!doctype html>
     .preview-inner {
       width: 100%;
       height: 100%;
-      min-height: 480px;
+      min-height: 0;
       display: grid;
-      place-items: center;
+      place-items: stretch;
       border: 1px solid rgba(157, 182, 209, 0.12);
       background:
         radial-gradient(circle at top right, rgba(255, 177, 68, 0.14), transparent 26%),
@@ -685,7 +770,7 @@ const reviewHtml = `<!doctype html>
 
     .preview-image {
       max-width: 100%;
-      max-height: 78vh;
+      max-height: 100%;
       object-fit: contain;
       display: block;
       box-shadow: var(--shadow-float);
@@ -694,7 +779,8 @@ const reviewHtml = `<!doctype html>
 
     .preview-frame {
       width: 100%;
-      height: 78vh;
+      height: 100%;
+      min-height: 0;
       border: none;
       background: white;
     }
@@ -734,14 +820,16 @@ const reviewHtml = `<!doctype html>
     .inspector-content {
       min-height: 0;
       overflow: auto;
-      padding: var(--space-4);
+      padding: 12px;
       display: grid;
-      gap: var(--space-4);
+      gap: 14px;
       background: var(--bg-panel);
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
     }
 
     .auth-card {
-      padding: 14px;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: var(--radius-card);
       background: rgba(255, 255, 255, 0.03);
@@ -749,7 +837,7 @@ const reviewHtml = `<!doctype html>
     }
 
     .item-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       line-height: 1.2;
       letter-spacing: -0.02em;
@@ -770,7 +858,7 @@ const reviewHtml = `<!doctype html>
       display: flex;
       justify-content: space-between;
       gap: var(--space-3);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .meta-row span:first-child {
@@ -797,10 +885,10 @@ const reviewHtml = `<!doctype html>
       background: rgba(255, 255, 255, 0.03);
       color: var(--text-secondary);
       border-radius: var(--radius-control);
-      min-height: 58px;
+      min-height: 54px;
       cursor: pointer;
       padding: 10px 8px;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.2;
       font-weight: 700;
       transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
@@ -840,8 +928,8 @@ const reviewHtml = `<!doctype html>
       background: rgba(255, 255, 255, 0.03);
       color: var(--text-secondary);
       border-radius: var(--radius-control);
-      padding: 8px 10px;
-      font-size: 12px;
+      padding: 7px 10px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       text-align: left;
@@ -856,11 +944,11 @@ const reviewHtml = `<!doctype html>
 
     .action-button {
       width: 100%;
-      min-height: 50px;
+      min-height: 48px;
       border: none;
       border-radius: var(--radius-control);
       color: white;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.01em;
       cursor: pointer;
@@ -926,7 +1014,7 @@ const reviewHtml = `<!doctype html>
     .history-list {
       display: grid;
       gap: var(--space-2);
-      max-height: 240px;
+      max-height: 220px;
       overflow: auto;
     }
 
@@ -953,6 +1041,57 @@ const reviewHtml = `<!doctype html>
       line-height: 1.45;
     }
 
+    .context-actions {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .context-button {
+      min-height: 38px;
+      border-radius: var(--radius-control);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 10px;
+    }
+
+    .context-button:hover {
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .context-button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .context-visual {
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-card);
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      display: grid;
+      gap: 6px;
+      text-align: left;
+      min-width: min(320px, 100%);
+    }
+
+    .context-visual-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .context-visual-copy {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
     .metadata-box {
       border: 1px solid var(--border);
       border-radius: var(--radius-card);
@@ -968,9 +1107,9 @@ const reviewHtml = `<!doctype html>
       width: 100%;
       border: none;
       background: transparent;
-      padding: var(--space-3);
+      padding: 11px 12px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -1002,7 +1141,7 @@ const reviewHtml = `<!doctype html>
       grid-template-columns: 1.3fr 1fr auto;
       gap: var(--space-4);
       align-items: center;
-      padding: 12px var(--space-5);
+      padding: 10px 12px;
       border-top: 1px solid var(--border);
       background: rgba(8, 18, 28, 0.82);
       backdrop-filter: blur(10px);
@@ -1204,6 +1343,12 @@ const reviewHtml = `<!doctype html>
       }
     }
 
+    @media (max-width: 1240px) {
+      :root {
+        --workspace-height: auto;
+      }
+    }
+
     @media (max-width: 720px) {
       .topbar {
         grid-template-columns: 1fr;
@@ -1211,10 +1356,32 @@ const reviewHtml = `<!doctype html>
 
       .main-grid {
         grid-template-columns: 1fr;
+        height: auto;
+        min-height: auto;
+        max-height: none;
       }
 
       .queue-panel {
         max-height: 40vh;
+      }
+
+      html, body {
+        overflow: auto;
+      }
+
+      .app-shell {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
+
+      .main-grid {
+        overflow: visible;
+        align-items: start;
+      }
+
+      .preview-context-grid {
+        grid-template-columns: 1fr;
       }
 
       .preview-inner,
@@ -1294,6 +1461,12 @@ const reviewHtml = `<!doctype html>
             <button class="filter-pill" data-filter="notebooklm">NotebookLM</button>
             <button class="filter-pill" data-filter="dashboard">Dashboard</button>
           </div>
+          <div class="filter-row" id="queue-mode-filters">
+            <button class="filter-pill active" data-queue-mode="active">Active</button>
+            <button class="filter-pill" data-queue-mode="hold">Hold</button>
+            <button class="filter-pill" data-queue-mode="approved">Approved</button>
+            <button class="filter-pill" data-queue-mode="all">All</button>
+          </div>
           <input id="search-input" class="search-input" type="search" placeholder="Search review items">
         </div>
         <div id="queue-list" class="queue-list"></div>
@@ -1308,6 +1481,17 @@ const reviewHtml = `<!doctype html>
           <div class="preview-toolbar-actions">
             <a id="open-preview-link" class="preview-link hidden" href="#" target="_blank" rel="noreferrer"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Raw</a>
             <div class="panel-subtle" id="sync-status">Sync unknown</div>
+          </div>
+        </div>
+        <div id="preview-context-bar" class="preview-context-bar">
+          <div id="preview-context-grid" class="preview-context-grid"></div>
+          <div class="preview-context-actions">
+            <button id="paired-visual-button" class="context-visual" type="button" style="display:none;">
+              <span class="context-visual-title" id="paired-visual-title">No paired visual</span>
+              <span class="context-visual-copy" id="paired-visual-copy">No clickable preview available.</span>
+            </button>
+            <button id="copy-post-button" class="context-button" type="button" disabled>Copy post text</button>
+            <button id="copy-thread-button" class="context-button" type="button" disabled>Copy thread</button>
           </div>
         </div>
         <div class="preview-canvas">
@@ -1444,11 +1628,14 @@ const reviewHtml = `<!doctype html>
       historyByItem: new Map(),
       analytics: null,
       filter: 'all',
+      queueMode: 'active',
       search: '',
       fetchStartedAt: Date.now(),
       selectedAt: 0,
       submitting: false,
     };
+
+    const LIVE_REFRESH_INTERVAL_MS = 60000;
 
     function escapeHtml(value) {
       return String(value == null ? '' : value)
@@ -1582,6 +1769,77 @@ const reviewHtml = `<!doctype html>
       };
     }
 
+    function liveUrl(path) {
+      const separator = path.includes('?') ? '&' : '?';
+      return path + separator + '__ts=' + Date.now();
+    }
+
+    function liveFetch(path) {
+      return fetch(liveUrl(path), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+    }
+
+    function wireLiveRefresh(refreshFn) {
+      const safeRefresh = () => refreshFn().catch(() => {});
+      window.addEventListener('focus', safeRefresh);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) safeRefresh();
+      });
+    }
+
+    let layoutFrame = 0;
+
+    function syncWorkspaceHeight() {
+      if (layoutFrame) {
+        window.cancelAnimationFrame(layoutFrame);
+      }
+
+      layoutFrame = window.requestAnimationFrame(() => {
+        layoutFrame = 0;
+
+        const grid = document.querySelector('.main-grid');
+        if (!grid) {
+          return;
+        }
+
+        if (window.innerWidth <= 1240) {
+          grid.style.height = '';
+          grid.style.minHeight = '';
+          grid.style.maxHeight = '';
+          return;
+        }
+
+        const inspectorPanel = document.getElementById('inspector-panel');
+        const metadataToggle = document.getElementById('metadata-toggle');
+        const queuePanel = document.querySelector('.queue-panel');
+        const queueList = document.getElementById('queue-list');
+        if (!inspectorPanel || !metadataToggle || !queuePanel || !queueList) {
+          return;
+        }
+
+        const inspectorRect = inspectorPanel.getBoundingClientRect();
+        const metadataRect = metadataToggle.getBoundingClientRect();
+        const metadataTarget = Math.ceil(metadataRect.bottom - inspectorRect.top + 18);
+
+        const queueRect = queuePanel.getBoundingClientRect();
+        const listRect = queueList.getBoundingClientRect();
+        const queueChrome = Math.max(0, listRect.top - queueRect.top) + Math.max(0, queueRect.bottom - listRect.bottom);
+        const firstQueueItem = queueList.querySelector('.queue-item');
+        const queueRowHeight = firstQueueItem ? firstQueueItem.getBoundingClientRect().height : 56;
+        const queueTarget = Math.ceil(queueChrome + (queueRowHeight * 16.75));
+
+        const nextHeight = Math.max(880, metadataTarget, queueTarget);
+        grid.style.height = nextHeight + 'px';
+        grid.style.minHeight = nextHeight + 'px';
+        grid.style.maxHeight = nextHeight + 'px';
+      });
+    }
+
     function authToken() {
       return document.getElementById('auth-token').value.trim();
     }
@@ -1592,6 +1850,110 @@ const reviewHtml = `<!doctype html>
 
     function currentItem() {
       return app.filteredItems.find((item) => item.id === app.selectedItemId) || app.items.find((item) => item.id === app.selectedItemId) || null;
+    }
+
+    function metadataForItem(item) {
+      if (!item) return {};
+      return app.metadata[item.id] || item.metadata || {};
+    }
+
+    function frontmatterForItem(item) {
+      const metadata = metadataForItem(item);
+      return metadata.__frontmatter__ && metadata.__frontmatter__.content ? metadata.__frontmatter__.content : {};
+    }
+
+    function markdownBodyForItem(item) {
+      const metadata = metadataForItem(item);
+      return metadata.__markdown_body__ && typeof metadata.__markdown_body__.content === 'string'
+        ? metadata.__markdown_body__.content
+        : '';
+    }
+
+    function normalizeWhitespace(value) {
+      return String(value || '').replace(/\\r/g, '').trim();
+    }
+
+    function markdownSections(body) {
+      const text = normalizeWhitespace(body);
+      if (!text) {
+        return { single: '', thread: '' };
+      }
+
+      const sectionPattern = /^#{1,6}\\s+(.+)$/gm;
+      const sections = [];
+      let match;
+      let lastIndex = 0;
+      let lastHeading = '';
+
+      while ((match = sectionPattern.exec(text))) {
+        if (lastHeading || lastIndex > 0) {
+          sections.push({
+            heading: lastHeading,
+            content: text.slice(lastIndex, match.index).trim(),
+          });
+        }
+        lastHeading = match[1].trim();
+        lastIndex = sectionPattern.lastIndex;
+      }
+
+      sections.push({
+        heading: lastHeading,
+        content: text.slice(lastIndex).trim(),
+      });
+
+      const singleSection = sections.find((section) => /forge single|single/.test(section.heading.toLowerCase()));
+      const threadSection = sections.find((section) => /thread/.test(section.heading.toLowerCase()));
+
+      if (singleSection || threadSection) {
+        return {
+          single: singleSection ? normalizeWhitespace(singleSection.content) : '',
+          thread: threadSection ? normalizeWhitespace(threadSection.content) : '',
+        };
+      }
+
+      if (text.includes('[Thread]')) {
+        const parts = text.split('[Thread]');
+        return {
+          single: normalizeWhitespace(parts[0]),
+          thread: normalizeWhitespace(parts.slice(1).join('[Thread]')),
+        };
+      }
+
+      return { single: text, thread: '' };
+    }
+
+    function targetAccountForItem(item, frontmatter) {
+      return frontmatter.target_account || frontmatter.account || (String(item && item.path || '').includes('lucas') ? '@LucasJOliver_78' : '@Forge_Builds');
+    }
+
+    function launchDayForItem(frontmatter) {
+      return frontmatter.launch_day || frontmatter.post_day || 'Needs scheduling';
+    }
+
+    function pairedVisualForItem(frontmatter) {
+      const filename = frontmatter.pairs_with_card;
+      if (!filename) return null;
+      return app.items.find((entry) => String(entry.path || '').endsWith('/' + filename) || String(entry.path || '').endsWith(filename)) || null;
+    }
+
+    async function copyToClipboard(text, button, defaultLabel, successLabel) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        if (button) {
+          button.textContent = successLabel;
+          window.setTimeout(() => {
+            button.textContent = defaultLabel;
+          }, 1400);
+        }
+      } catch (error) {
+        if (button) {
+          button.textContent = 'Clipboard blocked';
+          window.setTimeout(() => {
+            button.textContent = defaultLabel;
+          }, 1400);
+        }
+      }
     }
 
     function itemIcon(item) {
@@ -1608,17 +1970,47 @@ const reviewHtml = `<!doctype html>
       return 'status-needs_revision';
     }
 
-    function queueItemsForView() {
+    function queueModeLabel(mode) {
+      if (mode === 'hold') return 'hold items';
+      if (mode === 'approved') return 'approved items';
+      if (mode === 'all') return 'items';
+      return 'active items';
+    }
+
+    function queueItemsForScope() {
       return app.items
         .filter((item) => app.filter === 'all' || (item.artifact_category || item.category) === app.filter)
         .filter((item) => {
           const haystack = [item.name, item.path, item.artifact_category, item.type].join(' ').toLowerCase();
           return !app.search || haystack.includes(app.search);
+        });
+    }
+
+    function queueItemsForView() {
+      return queueItemsForScope()
+        .filter((item) => {
+          if (app.queueMode === 'hold') {
+            return item.current_decision === 'needs_revision' || item.current_decision === 'reject';
+          }
+          if (app.queueMode === 'approved') {
+            return item.current_decision === 'approve';
+          }
+          if (app.queueMode === 'all') {
+            return true;
+          }
+          return !item.current_decision;
         })
         .sort((left, right) => {
-          const leftPending = !left.current_decision || left.current_decision === 'needs_revision';
-          const rightPending = !right.current_decision || right.current_decision === 'needs_revision';
-          if (leftPending !== rightPending) return leftPending ? -1 : 1;
+          if (app.queueMode === 'hold') {
+            const leftPriority = left.current_decision === 'needs_revision' ? 0 : 1;
+            const rightPriority = right.current_decision === 'needs_revision' ? 0 : 1;
+            if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+          }
+          if (app.queueMode === 'all') {
+            const leftPending = !left.current_decision;
+            const rightPending = !right.current_decision;
+            if (leftPending !== rightPending) return leftPending ? -1 : 1;
+          }
           return String(right.modified_at || right.created_at || '').localeCompare(String(left.modified_at || left.created_at || ''));
         });
     }
@@ -1641,16 +2033,31 @@ const reviewHtml = `<!doctype html>
       ensureSelection();
       const root = document.getElementById('queue-list');
       const items = app.filteredItems;
+      const scopedItems = queueItemsForScope();
       const stats = app.state && app.state.reviews && app.state.reviews.stats ? app.state.reviews.stats : {};
       const collapsed = Number(stats.collapsed_variants || 0);
-      document.getElementById('queue-count').textContent = items.length + ' unique items in current view' + (collapsed ? ' -- ' + collapsed + ' variants collapsed' : '');
-      const reviewed = items.filter((item) => Boolean(item.current_decision)).length;
-      const total = Math.max(items.length, 1);
-      document.getElementById('review-progress-copy').textContent = reviewed + ' of ' + items.length + ' reviewed';
+      document.getElementById('queue-count').textContent = items.length + ' ' + queueModeLabel(app.queueMode) + ' in current view' + (collapsed ? ' -- ' + collapsed + ' variants collapsed' : '');
+      const reviewed = scopedItems.filter((item) => Boolean(item.current_decision)).length;
+      const total = Math.max(scopedItems.length, 1);
+      document.getElementById('review-progress-copy').textContent = reviewed + ' of ' + scopedItems.length + ' reviewed';
       document.getElementById('review-progress-fill').style.width = Math.round((reviewed / total) * 100) + '%';
 
       if (!items.length) {
-        root.innerHTML = '<div class="empty-preview" style="min-height: 240px;"><i class="fa-regular fa-folder-open"></i><div><div class="panel-title">No matching artifacts</div><div class="panel-subtle">Adjust filters or wait for the next sync.</div></div></div>';
+        const emptyTitle = app.queueMode === 'hold'
+          ? 'Hold lane is clear'
+          : app.queueMode === 'approved'
+            ? 'No approved items in this slice'
+            : app.queueMode === 'all'
+              ? 'No matching artifacts'
+              : 'Active queue is clear';
+        const emptyCopy = app.queueMode === 'hold'
+          ? 'Nothing is currently waiting on agent fixes in this filtered view.'
+          : app.queueMode === 'approved'
+            ? 'Nothing approved matches the current filters.'
+            : app.queueMode === 'all'
+              ? 'Adjust filters or wait for the next sync.'
+              : 'Everything in this filtered lane has already been decided.';
+        root.innerHTML = '<div class="empty-preview" style="min-height: 240px;"><i class="fa-regular fa-folder-open"></i><div><div class="panel-title">' + emptyTitle + '</div><div class="panel-subtle">' + emptyCopy + '</div></div></div>';
         return;
       }
 
@@ -1675,6 +2082,8 @@ const reviewHtml = `<!doctype html>
           '</span>' +
         '</button>';
       }).join('');
+
+      syncWorkspaceHeight();
     }
 
     function renderPreview() {
@@ -1739,13 +2148,20 @@ const reviewHtml = `<!doctype html>
 
     function renderInspector() {
       const item = currentItem();
+      const previewPanel = document.querySelector('.preview-panel');
       document.getElementById('inspector-panel').dataset.decision = app.selectedDecision;
       document.getElementById('item-title').textContent = item ? (item.name || item.path || 'Unnamed artifact') : 'No item selected';
 
       const badges = document.getElementById('item-badges');
       if (!item) {
+        if (previewPanel) previewPanel.classList.remove('has-context');
         badges.innerHTML = '';
         document.getElementById('item-meta').innerHTML = '';
+        document.getElementById('preview-context-bar').classList.remove('active');
+        document.getElementById('preview-context-grid').innerHTML = '';
+        document.getElementById('paired-visual-button').style.display = 'none';
+        document.getElementById('copy-post-button').disabled = true;
+        document.getElementById('copy-thread-button').disabled = true;
         document.getElementById('metadata-pre').textContent = '{}';
         document.getElementById('history-list').innerHTML = '<div class="panel-subtle">No revision history yet.</div>';
         document.getElementById('variants-section').style.display = 'none';
@@ -1768,6 +2184,59 @@ const reviewHtml = `<!doctype html>
         ['Modified', formatDate(item.modified_at)],
         ['Synced', formatDate(app.state && app.state.lastUpdated)],
       ].map(([label, value]) => '<div class="meta-row"><span>' + escapeHtml(label) + '</span><span>' + escapeHtml(value) + '</span></div>').join('');
+
+      const frontmatter = frontmatterForItem(item);
+      const markdownBody = markdownBodyForItem(item);
+      const sections = markdownSections(markdownBody);
+      const isPostCopy = item.review_content_type === 'post-copy' || item.review_content_type === 'gumroad-copy' || String(item.path || '').includes('post-copy/');
+      const pairedVisual = pairedVisualForItem(frontmatter);
+      const contextBar = document.getElementById('preview-context-bar');
+      const contextGrid = document.getElementById('preview-context-grid');
+      const pairedVisualButton = document.getElementById('paired-visual-button');
+      const pairedVisualTitle = document.getElementById('paired-visual-title');
+      const pairedVisualCopy = document.getElementById('paired-visual-copy');
+      const copyPostButton = document.getElementById('copy-post-button');
+      const copyThreadButton = document.getElementById('copy-thread-button');
+
+      if (isPostCopy) {
+        if (previewPanel) previewPanel.classList.add('has-context');
+        contextBar.classList.add('active');
+        contextGrid.innerHTML = [
+          ['Target account', targetAccountForItem(item, frontmatter)],
+          ['Launch slot', launchDayForItem(frontmatter)],
+          ['Pairing', frontmatter.pairs_with_card || 'No visual linked yet'],
+        ].map(([label, value]) => '<div class="preview-context-chip"><span>' + escapeHtml(label) + '</span><span>' + escapeHtml(value) + '</span></div>').join('');
+
+        if (pairedVisual) {
+          pairedVisualButton.style.display = 'grid';
+          pairedVisualButton.dataset.itemId = pairedVisual.id;
+          pairedVisualTitle.textContent = pairedVisual.name || frontmatter.pairs_with_card;
+          pairedVisualCopy.textContent = 'Open the paired visual in the review queue.';
+        } else if (frontmatter.pairs_with_card) {
+          pairedVisualButton.style.display = 'grid';
+          pairedVisualButton.dataset.itemId = '';
+          pairedVisualTitle.textContent = frontmatter.pairs_with_card;
+          pairedVisualCopy.textContent = 'Paired visual metadata exists, but the matching review item is not loaded yet.';
+        } else {
+          pairedVisualButton.style.display = 'none';
+          pairedVisualButton.dataset.itemId = '';
+        }
+
+        copyPostButton.disabled = !sections.single;
+        copyThreadButton.disabled = !sections.thread;
+        copyPostButton.dataset.copy = sections.single || '';
+        copyThreadButton.dataset.copy = sections.thread || '';
+      } else {
+        if (previewPanel) previewPanel.classList.remove('has-context');
+        contextBar.classList.remove('active');
+        contextGrid.innerHTML = '';
+        pairedVisualButton.style.display = 'none';
+        pairedVisualButton.dataset.itemId = '';
+        copyPostButton.disabled = true;
+        copyThreadButton.disabled = true;
+        copyPostButton.dataset.copy = '';
+        copyThreadButton.dataset.copy = '';
+      }
 
       const metadata = {
         path: item.path || null,
@@ -1821,6 +2290,7 @@ const reviewHtml = `<!doctype html>
 
       renderIssueTags();
       renderSubmitButton();
+      syncWorkspaceHeight();
     }
 
     function renderIssueTags() {
@@ -1863,7 +2333,7 @@ const reviewHtml = `<!doctype html>
 
     function renderStats() {
       const items = app.items;
-      const pending = items.filter((item) => !item.current_decision || item.current_decision === 'needs_revision').length;
+      const pending = items.filter((item) => !item.current_decision).length;
       const approved = items.filter((item) => item.current_decision === 'approve').length;
       const revision = items.filter((item) => item.current_decision === 'needs_revision').length;
       const rejected = items.filter((item) => item.current_decision === 'reject').length;
@@ -1940,7 +2410,7 @@ const reviewHtml = `<!doctype html>
     }
 
     async function fetchState() {
-      const response = await fetch('/api/state', { cache: 'no-store' });
+      const response = await liveFetch('/api/state');
       if (!response.ok) throw new Error('Unable to load review state');
       const payload = await response.json();
       if (payload && payload.status === 'no data yet') {
@@ -1960,7 +2430,7 @@ const reviewHtml = `<!doctype html>
     }
 
     async function fetchAnalytics() {
-      const response = await fetch('/api/analytics/summary', { cache: 'no-store' });
+      const response = await liveFetch('/api/analytics/summary');
       if (!response.ok) throw new Error('Unable to load analytics');
       const payload = await response.json();
       app.analytics = payload.analytics || null;
@@ -1969,12 +2439,19 @@ const reviewHtml = `<!doctype html>
 
     async function fetchHistory(itemId) {
       if (!itemId) return;
-      const response = await fetch('/api/review-events?item_id=' + encodeURIComponent(itemId) + '&limit=20', { cache: 'no-store' });
+      const response = await liveFetch('/api/review-events?item_id=' + encodeURIComponent(itemId) + '&limit=20');
       if (!response.ok) return;
       const payload = await response.json();
       app.historyByItem.set(itemId, Array.isArray(payload.events) ? payload.events : []);
       if (currentItem() && currentItem().id === itemId) {
         renderInspector();
+      }
+    }
+
+    async function refreshLiveData() {
+      await Promise.all([fetchState(), fetchAnalytics()]);
+      if (app.selectedItemId) {
+        await fetchHistory(app.selectedItemId);
       }
     }
 
@@ -2010,17 +2487,15 @@ const reviewHtml = `<!doctype html>
       }
     }
 
-    function nextPendingItemId() {
-      const items = app.filteredItems;
-      const index = items.findIndex((item) => item.id === app.selectedItemId);
-      if (index === -1) return items[0] ? items[0].id : null;
-      for (let offset = 1; offset < items.length; offset += 1) {
-        const item = items[(index + offset) % items.length];
-        if (!item.current_decision || item.current_decision === 'needs_revision') {
-          return item.id;
-        }
+    function nextQueueItemId(currentItemId) {
+      const items = queueItemsForView();
+      if (!items.length) return null;
+      if (items.length === 1) {
+        return items[0].id === currentItemId ? null : items[0].id;
       }
-      return items[(index + 1) % items.length] ? items[(index + 1) % items.length].id : null;
+      const index = items.findIndex((item) => item.id === currentItemId);
+      if (index === -1) return items[0].id;
+      return items[(index + 1) % items.length].id;
     }
 
     async function submitDecision(decision, button) {
@@ -2078,21 +2553,22 @@ const reviewHtml = `<!doctype html>
         if (index >= 0) {
           app.items[index] = result.item;
         }
+        const nextId = nextQueueItemId(item.id);
         document.getElementById('comment-box').value = '';
         app.selectedIssues = new Set();
         renderStats();
-        renderQueue();
-        renderInspector();
         await fetchHistory(item.id);
         await fetchAnalytics();
         flashSyncStatus(decision === 'approve' ? 'Approved' : (decision === 'reject' ? 'Rejected' : 'Marked for revision'));
         flashPreview(decision);
 
-        const nextId = nextPendingItemId();
         if (nextId && nextId !== item.id) {
           await animateAdvance(decision, nextId);
         } else {
+          app.selectedItemId = null;
+          renderQueue();
           renderPreview();
+          renderInspector();
         }
       } catch (error) {
         window.alert(error.message);
@@ -2130,6 +2606,7 @@ const reviewHtml = `<!doctype html>
       const button = document.getElementById('analytics-toggle');
       drawer.classList.toggle('open');
       button.textContent = drawer.classList.contains('open') ? 'Hide Analytics' : 'Show Analytics';
+      syncWorkspaceHeight();
     }
 
     function moveSelection(delta) {
@@ -2149,7 +2626,17 @@ const reviewHtml = `<!doctype html>
         const button = event.target.closest('[data-filter]');
         if (!button) return;
         app.filter = button.dataset.filter;
-        Array.from(document.querySelectorAll('.filter-pill')).forEach((node) => node.classList.toggle('active', node === button));
+        Array.from(document.querySelectorAll('#category-filters .filter-pill')).forEach((node) => node.classList.toggle('active', node === button));
+        renderQueue();
+        renderPreview();
+        renderInspector();
+      });
+
+      document.getElementById('queue-mode-filters').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-queue-mode]');
+        if (!button) return;
+        app.queueMode = button.dataset.queueMode || 'active';
+        Array.from(document.querySelectorAll('#queue-mode-filters .filter-pill')).forEach((node) => node.classList.toggle('active', node === button));
         renderQueue();
         renderPreview();
         renderInspector();
@@ -2188,9 +2675,23 @@ const reviewHtml = `<!doctype html>
 
       document.getElementById('submit-button').addEventListener('click', (event) => submitDecision(app.selectedDecision, event.currentTarget));
       document.getElementById('analytics-toggle').addEventListener('click', toggleAnalyticsDrawer);
-      document.getElementById('metadata-toggle').addEventListener('click', () => document.getElementById('metadata-box').classList.toggle('open'));
+      document.getElementById('metadata-toggle').addEventListener('click', () => {
+        document.getElementById('metadata-box').classList.toggle('open');
+        syncWorkspaceHeight();
+      });
       document.getElementById('mobile-inspector-toggle').addEventListener('click', () => document.getElementById('inspector-panel').classList.add('open'));
       document.getElementById('mobile-inspector-close').addEventListener('click', () => document.getElementById('inspector-panel').classList.remove('open'));
+      document.getElementById('copy-post-button').addEventListener('click', (event) => {
+        copyToClipboard(event.currentTarget.dataset.copy || '', event.currentTarget, 'Copy post text', 'Post copied');
+      });
+      document.getElementById('copy-thread-button').addEventListener('click', (event) => {
+        copyToClipboard(event.currentTarget.dataset.copy || '', event.currentTarget, 'Copy thread', 'Thread copied');
+      });
+      document.getElementById('paired-visual-button').addEventListener('click', (event) => {
+        const itemId = event.currentTarget.dataset.itemId;
+        if (!itemId) return;
+        selectItem(itemId);
+      });
 
       window.addEventListener('keydown', (event) => {
         const target = event.target;
@@ -2226,6 +2727,8 @@ const reviewHtml = `<!doctype html>
           document.getElementById('search-input').focus();
         }
       });
+
+      window.addEventListener('resize', debounce(syncWorkspaceHeight, 80));
     }
 
     async function boot() {
@@ -2241,19 +2744,15 @@ const reviewHtml = `<!doctype html>
       '</div>';
 
       try {
-        await Promise.all([fetchState(), fetchAnalytics()]);
-        if (app.selectedItemId) {
-          fetchHistory(app.selectedItemId);
-        }
-        window.setInterval(() => {
-          Promise.all([fetchState(), fetchAnalytics()]).catch(() => {});
-          if (app.selectedItemId) {
-            fetchHistory(app.selectedItemId).catch(() => {});
-          }
-        }, 60000);
+        await refreshLiveData();
+        syncWorkspaceHeight();
       } catch (error) {
         document.getElementById('queue-list').innerHTML = '<div class="empty-preview" style="min-height:240px;"><i class="fa-solid fa-triangle-exclamation"></i><div><div class="panel-title">Review data unavailable</div><div class="panel-subtle">' + escapeHtml(error.message) + '</div></div></div>';
       }
+      window.setInterval(() => {
+        refreshLiveData().catch(() => {});
+      }, LIVE_REFRESH_INTERVAL_MS);
+      wireLiveRefresh(refreshLiveData);
     }
 
     boot();

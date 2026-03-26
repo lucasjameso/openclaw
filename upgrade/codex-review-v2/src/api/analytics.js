@@ -9,12 +9,20 @@ function corsHeaders(extraHeaders = {}) {
   };
 }
 
+function freshHeaders(extraHeaders = {}) {
+  return corsHeaders({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0, s-maxage=0',
+    Pragma: 'no-cache',
+    Expires: '0',
+    ...extraHeaders,
+  });
+}
+
 function jsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload, null, 2), {
     status,
-    headers: corsHeaders({
+    headers: freshHeaders({
       'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
     }),
   });
 }
@@ -65,8 +73,10 @@ export async function handleAnalyticsSummary(env) {
   const totalRevisions = items.reduce((sum, item) => sum + safeNumber(item.revision_count), 0);
 
   const categoryMap = new Map();
+  const contentTypeMap = new Map();
   for (const item of items) {
     const category = item.artifact_category || item.category || 'uncategorized';
+    const contentType = item.review_content_type || item.type || 'unknown';
     const record = categoryMap.get(category) || {
       category,
       total: 0,
@@ -87,12 +97,43 @@ export async function handleAnalyticsSummary(env) {
     }
 
     categoryMap.set(category, record);
+
+    const contentRecord = contentTypeMap.get(contentType) || {
+      content_type: contentType,
+      total: 0,
+      approved: 0,
+      needs_revision: 0,
+      rejected: 0,
+      total_revisions: 0,
+    };
+
+    contentRecord.total += 1;
+    contentRecord.total_revisions += safeNumber(item.revision_count);
+    if (item.current_decision === 'approve') {
+      contentRecord.approved += 1;
+    } else if (item.current_decision === 'reject') {
+      contentRecord.rejected += 1;
+    } else if (item.current_decision === 'needs_revision' || !item.current_decision) {
+      contentRecord.needs_revision += 1;
+    }
+
+    contentTypeMap.set(contentType, contentRecord);
   }
 
   const categoryPerformance = Array.from(categoryMap.values()).map((record) => ({
     category: record.category,
     total: record.total,
     approved: record.approved,
+    revision_rate: percentage(record.needs_revision, record.total),
+    reject_rate: percentage(record.rejected, record.total),
+    avg_revisions: Number((record.total_revisions / Math.max(record.total, 1)).toFixed(2)),
+  })).sort((left, right) => right.total - left.total);
+
+  const contentTypePerformance = Array.from(contentTypeMap.values()).map((record) => ({
+    content_type: record.content_type,
+    total: record.total,
+    approved: record.approved,
+    approval_rate: percentage(record.approved, record.total),
     revision_rate: percentage(record.needs_revision, record.total),
     reject_rate: percentage(record.rejected, record.total),
     avg_revisions: Number((record.total_revisions / Math.max(record.total, 1)).toFixed(2)),
@@ -143,6 +184,7 @@ export async function handleAnalyticsSummary(env) {
         avg_revisions: Number((totalRevisions / Math.max(items.length, 1)).toFixed(2)),
         in_revision: items.filter((item) => item.current_decision === 'needs_revision').length,
       },
+      content_type_performance: contentTypePerformance,
       category_performance: categoryPerformance,
       model_performance: modelPerformance,
       throughput: {

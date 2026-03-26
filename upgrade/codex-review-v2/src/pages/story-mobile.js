@@ -390,15 +390,48 @@ const storyMobileHtml = `<!doctype html>
       return diffDays > 0 ? 'Synced ' + diffDays + 'd ago' : 'Sync in ' + Math.abs(diffDays) + 'd';
     }
 
-    async function boot() {
+    const LIVE_REFRESH_INTERVAL_MS = 60000;
+
+    function liveUrl(path) {
+      const separator = path.includes('?') ? '&' : '?';
+      return path + separator + '__ts=' + Date.now();
+    }
+
+    function liveFetch(path) {
+      return fetch(liveUrl(path), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+    }
+
+    function wireLiveRefresh(refreshFn) {
+      const safeRefresh = () => refreshFn().catch(() => {});
+      window.addEventListener('focus', safeRefresh);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) safeRefresh();
+      });
+    }
+
+    async function refreshState() {
       try {
-        const response = await fetch('/api/state', { cache: 'no-store' });
+        const response = await liveFetch('/api/state');
         if (!response.ok) throw new Error('state unavailable');
         const state = await response.json();
         document.getElementById('sync-chip').textContent = formatRelative(state.lastUpdated);
       } catch (error) {
         document.getElementById('sync-chip').textContent = 'Live state offline';
       }
+    }
+
+    async function boot() {
+      await refreshState();
+      setInterval(() => {
+        refreshState().catch(() => {});
+      }, LIVE_REFRESH_INTERVAL_MS);
+      wireLiveRefresh(refreshState);
     }
 
     boot();

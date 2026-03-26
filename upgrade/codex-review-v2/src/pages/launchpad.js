@@ -485,6 +485,30 @@ const launchpadHtml = `<!doctype html>
         rgba(255,255,255,0.03);
     }
 
+    .hook-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .hook-copy-button {
+      cursor: pointer;
+      appearance: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(121, 188, 255, 0.22);
+      background: rgba(121, 188, 255, 0.08);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .hook-copy-button:hover {
+      background: rgba(121, 188, 255, 0.16);
+    }
+
     .card.strike {
       border-left: 4px solid rgba(255, 158, 82, 0.84);
       padding-left: 14px;
@@ -735,16 +759,16 @@ const launchpadHtml = `<!doctype html>
 
   <script>
     const LAUNCH_BLOCKERS = [
-      { level: 'critical', title: 'Finalize product cover image', copy: 'The guide has copy, chapters, hooks, voiceovers, and visual drafts. The single highest-signal missing asset is the final cover export for the listing.' },
-      { level: 'critical', title: 'Assemble the 10 chapters into one PDF', copy: 'The content already exists. It still needs to be assembled into one product someone can buy instead of ten markdown files someone can admire.' },
-      { level: 'important', title: 'Create the Gumroad product', copy: 'Listing copy is done. The account still needs the product created, cover uploaded, price set, and link made real.' },
-      { level: 'important', title: 'Post the first launch announcement', copy: 'The system has the story, the visuals, and the hooks. The launch is not real until the first post ships.' }
+      { level: 'critical', title: 'Finalize product cover image before March 28', copy: 'The guide has copy, chapters, hooks, voiceovers, and visual drafts. The single highest-signal missing asset is the final cover export for the March 28 cover drop.' },
+      { level: 'critical', title: 'Assemble the 10 chapters into one PDF before March 29', copy: 'The content already exists. It still needs to be assembled into one product someone can buy this weekend instead of ten markdown files someone can admire.' },
+      { level: 'important', title: 'Create the Gumroad product before March 29', copy: 'Listing copy is done. The account still needs the product created, cover uploaded, price locked at $19, and link made real before the weekend launch.' },
+      { level: 'important', title: 'Ship the teaser and cover sequence', copy: 'March 27 is the teaser plus free checklist. March 28 is the cover drop. The launch is not real until those posts ship.' }
     ];
 
     const REVENUE_MOVES = [
-      { rank: '01', label: 'right now', title: 'Launch The $809 Mistake Guide', copy: 'Closest path to first dollars. The work is already done; now the packaging has to catch up.' },
-      { rank: '02', label: 'today', title: 'Lead with the $75/day leak story', copy: 'That one number is the sharpest way to earn trust and drive people toward the guide.' },
-      { rank: '03', label: 'today', title: 'Turn Roger clips into short-form videos', copy: 'The audio exists. Short-video covers now exist. That is distribution fuel sitting on disk.' },
+      { rank: '01', label: 'this weekend', title: 'Launch The $809 Mistake Guide on March 29', copy: 'Closest path to first dollars. The work is already done; now the packaging has to catch up on a March 29 deadline.' },
+      { rank: '02', label: 'March 27', title: 'Lead with the $75/day leak story', copy: 'That one number is the sharpest way to earn trust and drive people toward the guide before the weekend launch.' },
+      { rank: '03', label: 'March 28', title: 'Turn Roger clips into short-form videos', copy: 'The audio exists. Short-video covers now exist. That is distribution fuel for the cover drop and launch-eve push.' },
       { rank: '04', label: 'this week', title: 'Sell AI ops teardown offers', copy: 'Productized expertise can start earning before the Advisor ships.' },
       { rank: '05', label: 'this week', title: 'Open the Advisor waitlist', copy: 'Capture intent while the main content engine builds trust in public.' }
     ];
@@ -779,34 +803,52 @@ const launchpadHtml = `<!doctype html>
 
     const TOP_HOOKS = [
       {
+        id: 'L-001',
         lane: 'guide launch',
         format: 'single + cover',
-        title: 'We were leaking $75 a day while we slept.',
-        copy: 'One silent model fallback turned a cheap autonomous stack into a slow financial injury. That mistake is the guide hook because it is painfully easy to understand.'
+        title: 'We spent $75/day on the wrong model and did not know for 48 hours',
+        hook: 'Our AI agent was burning $75/day. We thought it was using the cheap model. It was not. Here is what happened.',
+        score: 95
       },
       {
+        id: 'L-006',
+        lane: 'money receipts',
+        format: 'single + breakdown',
+        title: 'Total invested: $809. Revenue: $0. Here is why we are not worried.',
+        hook: 'We have spent $809 building an autonomous AI agent. Revenue so far: $0. Here is the entire breakdown and why we are still going.',
+        score: 92
+      },
+      {
+        id: 'L-002',
         lane: 'thread / short video',
         format: 'receipts thread',
-        title: 'Forty-six files in one overnight sprint is either momentum or a cry for help.',
-        copy: 'This one works because it sounds unhinged, but it is true. The dashboard, the story page, the launchpad, the mobile story, the visuals, the covers. All in one run.'
+        title: 'Our agent completed 9 tasks in 43 minutes and none of them were good enough',
+        hook: 'Our AI agent completed 9 tasks in 43 minutes. We were thrilled. Then we looked at the output.',
+        score: 90
       },
       {
-        lane: 'single / clip',
-        format: 'deadpan humor',
-        title: 'Our autonomous agent assigned the human an approval task.',
-        copy: 'It is a clean joke because it is also an operational truth. The future did not remove management overhead. It recreated it immediately.'
+        id: 'L-010',
+        lane: 'ops proof',
+        format: 'single / carousel',
+        title: 'Rolling worker sessions completed 3 tasks in 7 minutes with zero downtime',
+        hook: 'Our AI agent completed 3 tasks in 7 minutes with zero downtime between them. Here is the rolling worker system that makes continuous execution possible.',
+        score: 89
       },
       {
-        lane: 'video / carousel',
-        format: 'lesson card',
-        title: 'Nine tasks in forty-three minutes looked productive until quality collapsed.',
-        copy: 'That is the shallow-task trap in one sentence: velocity without standards is just speed-running mediocrity.'
+        id: 'L-005',
+        lane: 'deadpan pain',
+        format: 'single / clip',
+        title: 'The anti-paralysis contract that stopped our agent from overthinking',
+        hook: 'Our AI agent spent 15 minutes saying actually... actually... actually... and produced nothing. Here is the contract that fixed it.',
+        score: 88
       },
       {
-        lane: 'brand narrative',
-        format: 'single / story opener',
-        title: 'Claude sharpens the story. Codex sharpens the system. Forge generates enough chaos to keep both honest.',
-        copy: 'This is the cleanest explanation of the model-chain loop, and it is weird enough to make people stop scrolling.'
+        id: 'L-007',
+        lane: 'build system',
+        format: 'single / lesson card',
+        title: 'Our 20-minute PDF task became 4 smaller tasks and got done in 7 minutes',
+        hook: 'Our AI agent had a 20-minute PDF task. It turned it into 4 smaller tasks and finished in 7 minutes. Here is the decomposition rule that made it possible.',
+        score: 87
       }
     ];
 
@@ -940,12 +982,34 @@ const launchpadHtml = `<!doctype html>
         return '<article class="card hook">' +
           '<div class="card-top">' +
             '<span class="pill"><i class="fa-solid fa-sparkles"></i> ' + escapeHtml(item.lane) + '</span>' +
-            '<span class="pill">' + escapeHtml(item.format) + '</span>' +
+            '<span class="pill">score ' + escapeHtml(String(item.score)) + '</span>' +
           '</div>' +
           '<div class="card-title">' + escapeHtml(item.title) + '</div>' +
-          '<div class="card-copy">' + escapeHtml(item.copy) + '</div>' +
+          '<div class="card-copy">' + escapeHtml(item.hook) + '</div>' +
+          '<div class="hook-meta">' +
+            '<span class="pill">' + escapeHtml(item.format) + '</span>' +
+            '<span class="pill">' + escapeHtml(item.id) + '</span>' +
+            '<button class="hook-copy-button" type="button" data-copy="' + escapeHtml(item.hook) + '"><i class="fa-regular fa-copy"></i> Copy hook</button>' +
+          '</div>' +
         '</article>';
       }).join('');
+    }
+
+    function bindHookActions() {
+      document.querySelectorAll('.hook-copy-button').forEach(function(button) {
+        button.addEventListener('click', async function() {
+          const payload = button.getAttribute('data-copy') || '';
+          try {
+            await navigator.clipboard.writeText(payload);
+            button.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+            setTimeout(function() {
+              button.innerHTML = '<i class="fa-regular fa-copy"></i> Copy hook';
+            }, 1600);
+          } catch (error) {
+            button.innerHTML = '<i class="fa-solid fa-xmark"></i> Clipboard blocked';
+          }
+        });
+      });
     }
 
     function renderState(state) {
@@ -972,27 +1036,61 @@ const launchpadHtml = `<!doctype html>
       document.getElementById('launch-review').textContent = String(reviewItems.length);
       document.getElementById('target-metric').textContent = formatCurrency(revenueTarget, 0);
       document.getElementById('strike-kicker').textContent = FEATURED_STRIKE.length + ' asset strike stack ready to ship';
-      document.getElementById('hooks-kicker').textContent = TOP_HOOKS.length + ' sharp hooks loaded for launch';
+      document.getElementById('hooks-kicker').textContent = TOP_HOOKS.length + ' lesson hooks loaded from agent-lessons.json';
       document.getElementById('sync-chip').innerHTML = '<strong>Synced ' + escapeHtml(formatRelative(state.lastUpdated)) + '</strong>';
     }
 
+    const LIVE_REFRESH_INTERVAL_MS = 60000;
+
+    function liveUrl(path) {
+      const separator = path.includes('?') ? '&' : '?';
+      return path + separator + '__ts=' + Date.now();
+    }
+
+    function liveFetch(path) {
+      return fetch(liveUrl(path), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+    }
+
+    function wireLiveRefresh(refreshFn) {
+      const safeRefresh = () => refreshFn().catch(() => {});
+      window.addEventListener('focus', safeRefresh);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) safeRefresh();
+      });
+    }
+
     async function fetchState() {
-      const response = await fetch('/api/state', { cache: 'no-store' });
+      const response = await liveFetch('/api/state');
       if (!response.ok) throw new Error('Unable to load launch state');
       return response.json();
+    }
+
+    async function refreshState() {
+      const state = await fetchState();
+      renderState(state);
     }
 
     async function boot() {
       renderHeartbeat();
       renderStaticSections();
+      bindHookActions();
       setClock();
       setInterval(setClock, 1000);
       try {
-        const state = await fetchState();
-        renderState(state);
+        await refreshState();
       } catch (error) {
         document.getElementById('hero-copy').textContent = error.message;
       }
+      setInterval(() => {
+        refreshState().catch(() => {});
+      }, LIVE_REFRESH_INTERVAL_MS);
+      wireLiveRefresh(refreshState);
     }
 
     boot();

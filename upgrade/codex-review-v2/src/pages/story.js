@@ -803,8 +803,8 @@ const storyHtml = `<!doctype html>
       </article>
       <article class="metric-card">
         <div class="metric-label">DeepSeek Fuel</div>
-        <div class="metric-value" id="metric-balance">$0</div>
-        <div class="metric-copy" id="metric-balance-copy">Current balance from the live operational worker.</div>
+        <div class="metric-value" id="metric-balance">--</div>
+        <div class="metric-copy" id="metric-balance-copy">Waiting for live worker state.</div>
       </article>
     </section>
 
@@ -951,6 +951,19 @@ const storyHtml = `<!doctype html>
 
     function formatInteger(value) {
       return new Intl.NumberFormat('en-US').format(Math.round(safeNumber(value)));
+    }
+
+    function setStaticMetricValue(id, text) {
+      const node = document.getElementById(id);
+      if (!node) {
+        return;
+      }
+      if (app.animations.has(id)) {
+        cancelAnimationFrame(app.animations.get(id));
+        app.animations.delete(id);
+      }
+      node.textContent = text;
+      node.dataset.value = '0';
     }
 
     function formatRelative(iso) {
@@ -1148,13 +1161,20 @@ const storyHtml = `<!doctype html>
       const reviews = state.reviews && state.reviews.stats ? state.reviews.stats : {};
       const revenue = state.revenue || {};
       const xPosts = state.xPosts || {};
+      const apis = state.apis || {};
       const postCount = safeNumber(xPosts.forge && xPosts.forge.postsToday) + safeNumber(xPosts.lucas && xPosts.lucas.postsToday);
       const reviewUniverse = safeNumber(reviews.unique_items) || safeNumber(reviews.pending) + safeNumber(reviews.needs_revision) + safeNumber(reviews.approved) + safeNumber(reviews.rejected);
       const backlog = safeNumber(reviews.pending) + safeNumber(reviews.needs_revision);
+      const deepseekOnline = String(apis.deepseek || '').toLowerCase() === 'online';
+      const deepseekBalance = safeNumber(system.deepseekBalance);
 
       animateNumber('metric-posts', postCount, function(value) { return formatInteger(value); }, 650);
       animateNumber('metric-reviews', reviewUniverse, function(value) { return formatInteger(value); }, 650);
-      animateNumber('metric-balance', safeNumber(system.deepseekBalance), function(value) { return formatCurrency(value, 2); }, 800);
+      if (deepseekOnline || deepseekBalance > 0) {
+        animateNumber('metric-balance', deepseekBalance, function(value) { return formatCurrency(value, 2); }, 800);
+      } else {
+        setStaticMetricValue('metric-balance', '--');
+      }
       animateNumber('hero-spend', 809, function(value) { return formatCurrency(value, 0); }, 900);
       animateNumber('hero-savings', 47, function(value) { return formatInteger(value) + 'x'; }, 900);
       animateNumber('metric-lessons', 6, function(value) { return formatInteger(value); }, 600);
@@ -1165,10 +1185,11 @@ const storyHtml = `<!doctype html>
       document.getElementById('metric-reviews-copy').textContent = reviewUniverse
         ? reviewUniverse + ' unique review items are currently visible.'
         : 'The review queue is not currently populated.';
-      document.getElementById('metric-balance-copy').textContent =
-        'Live fuel reserve last synced ' + formatRelative(state.lastUpdated) + '.';
+      document.getElementById('metric-balance-copy').textContent = deepseekOnline
+        ? 'Live fuel reserve last synced ' + formatRelative(state.lastUpdated) + '.'
+        : 'DeepSeek balance is unavailable in the current state payload. Check the worker sync if this stays offline.';
       document.getElementById('hero-live-copy').textContent =
-        (system.status || 'unknown') + ' -- ' + (system.nextSession && system.nextSession.name || 'No session scheduled') + ' -- sync ' + formatRelative(state.lastUpdated) + '.';
+        (system.status || 'unknown') + ' -- ' + (system.nextSession && system.nextSession.name || 'No session scheduled') + ' -- DeepSeek ' + (deepseekOnline ? 'online' : 'offline') + ' -- sync ' + formatRelative(state.lastUpdated) + '.';
 
       document.getElementById('status-system').textContent = system.status || 'unknown';
       document.getElementById('status-next-session').textContent =
@@ -1181,12 +1202,43 @@ const storyHtml = `<!doctype html>
       renderRunway(state);
     }
 
+    const LIVE_REFRESH_INTERVAL_MS = 60000;
+
+    function liveUrl(path) {
+      const separator = path.includes('?') ? '&' : '?';
+      return path + separator + '__ts=' + Date.now();
+    }
+
+    function liveFetch(path) {
+      return fetch(liveUrl(path), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+    }
+
+    function wireLiveRefresh(refreshFn) {
+      const safeRefresh = () => refreshFn().catch(() => {});
+      window.addEventListener('focus', safeRefresh);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) safeRefresh();
+      });
+    }
+
     async function fetchState() {
-      const response = await fetch('/api/state', { cache: 'no-store' });
+      const response = await liveFetch('/api/state');
       if (!response.ok) {
         throw new Error('Unable to load state');
       }
       return response.json();
+    }
+
+    async function refreshState() {
+      const state = await fetchState();
+      app.state = state;
+      renderState(state);
     }
 
     async function boot() {
@@ -1195,18 +1247,14 @@ const storyHtml = `<!doctype html>
       setClock();
       setInterval(setClock, 1000);
       try {
-        const state = await fetchState();
-        app.state = state;
-        renderState(state);
+        await refreshState();
       } catch (error) {
         document.getElementById('hero-live-copy').textContent = error.message;
       }
       setInterval(function() {
-        fetchState().then(function(state) {
-          app.state = state;
-          renderState(state);
-        }).catch(function() {});
-      }, 60000);
+        refreshState().catch(function() {});
+      }, LIVE_REFRESH_INTERVAL_MS);
+      wireLiveRefresh(refreshState);
     }
 
     boot();

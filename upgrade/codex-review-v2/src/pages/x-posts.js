@@ -1329,6 +1329,29 @@ const xPostsHtml = `<!doctype html>
   <script>
     const REFRESH_INTERVAL_MS = 60000;
 
+    function liveUrl(path) {
+      const separator = path.includes('?') ? '&' : '?';
+      return path + separator + '__ts=' + Date.now();
+    }
+
+    function liveFetch(path) {
+      return fetch(liveUrl(path), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
+    }
+
+    function wireLiveRefresh(refreshFn) {
+      const safeRefresh = () => refreshFn().catch(() => {});
+      window.addEventListener('focus', safeRefresh);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) safeRefresh();
+      });
+    }
+
     function escapeHtml(value) {
       return String(value)
         .replace(/&/g, '&amp;')
@@ -1902,7 +1925,7 @@ const xPostsHtml = `<!doctype html>
 
     async function fetchState() {
       try {
-        const response = await fetch('/api/state', { cache: 'no-store' });
+        const response = await liveFetch('/api/state');
         if (!response.ok) throw new Error('Request failed');
 
         const state = await response.json();
@@ -1925,6 +1948,7 @@ const xPostsHtml = `<!doctype html>
     setInterval(setClock, 1000);
     fetchState();
     setInterval(fetchState, REFRESH_INTERVAL_MS);
+    wireLiveRefresh(fetchState);
   </script>
 </body>
 </html>`;

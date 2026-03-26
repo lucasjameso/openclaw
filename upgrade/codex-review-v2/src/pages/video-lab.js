@@ -466,10 +466,43 @@ const videoLabHtml = `<!doctype html>
         }).format(new Date()) + ' ET';
       }
 
+      const LIVE_REFRESH_INTERVAL_MS = 60000;
+
+      function liveUrl(path) {
+        const separator = path.includes('?') ? '&' : '?';
+        return path + separator + '__ts=' + Date.now();
+      }
+
+      function liveFetch(path) {
+        return fetch(liveUrl(path), {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            Pragma: 'no-cache',
+          },
+        });
+      }
+
+      function wireLiveRefresh(refreshFn) {
+        const safeRefresh = () => refreshFn().catch(() => {});
+        window.addEventListener('focus', safeRefresh);
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) safeRefresh();
+        });
+      }
+
       async function fetchState() {
-        const response = await fetch('/api/state', { cache: 'no-store' });
+        const response = await liveFetch('/api/state');
         if (!response.ok) throw new Error('Unable to load video lab state');
         return response.json();
+      }
+
+      async function refreshState() {
+        const state = await fetchState();
+        document.getElementById('hero-copy').textContent =
+          'Motion is the next amplifier. The clips, covers, and diagrams now need to become videos that pull attention back into the guide, the story page, and the first paid offer.';
+        document.getElementById('sync-chip').innerHTML = '<strong>Synced ' + escapeHtml(formatRelative(state.lastUpdated)) + '</strong>';
+        document.getElementById('sync-metric').textContent = formatRelative(state.lastUpdated);
       }
 
       async function boot() {
@@ -477,14 +510,14 @@ const videoLabHtml = `<!doctype html>
         setClock();
         setInterval(setClock, 1000);
         try {
-          const state = await fetchState();
-          document.getElementById('hero-copy').textContent =
-            'Motion is the next amplifier. The clips, covers, and diagrams now need to become videos that pull attention back into the guide, the story page, and the first paid offer.';
-          document.getElementById('sync-chip').innerHTML = '<strong>Synced ' + escapeHtml(formatRelative(state.lastUpdated)) + '</strong>';
-          document.getElementById('sync-metric').textContent = formatRelative(state.lastUpdated);
+          await refreshState();
         } catch (error) {
           document.getElementById('hero-copy').textContent = error.message;
         }
+        setInterval(() => {
+          refreshState().catch(() => {});
+        }, LIVE_REFRESH_INTERVAL_MS);
+        wireLiveRefresh(refreshState);
       }
 
       boot();
