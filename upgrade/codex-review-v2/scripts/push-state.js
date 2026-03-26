@@ -26,7 +26,8 @@ const DASHBOARD_API_URL = process.env.DASHBOARD_API_URL;
 const DASHBOARD_API_TOKEN = process.env.DASHBOARD_API_TOKEN;
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const FORGE_MODEL = process.env.FORGE_MODEL || 'deepseek-chat';
-const WORKSPACE = process.env.OPENCLAW_WORKSPACE || '/home/node/.openclaw/workspace';
+const WORKSPACE = process.env.OPENCLAW_WORKSPACE ||
+  (fs.existsSync('/home/node/.openclaw/workspace') ? '/home/node/.openclaw/workspace' : path.join(__dirname, '../../../data/workspace'));
 
 const PATHS = {
   queue: path.join(WORKSPACE, 'QUEUE.json'),
