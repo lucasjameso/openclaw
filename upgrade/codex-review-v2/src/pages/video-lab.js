@@ -1,3 +1,7 @@
+import { sharedComponentStyles } from './shared/components.js';
+import { renderSharedShellStyles, renderTopbar } from './shared/shell.js';
+import { renderCompactTokenDeclarations } from './shared/tokens.js';
+
 const videoLabHtml = `<!doctype html>
 <html lang="en">
 <head>
@@ -24,6 +28,20 @@ const videoLabHtml = `<!doctype html>
       --shadow: 0 28px 72px rgba(0, 0, 0, 0.34);
       --radius: 28px;
       --radius-md: 20px;
+${renderCompactTokenDeclarations({
+  '--shell-max-width': '1540px',
+  '--shell-padding': '24px 24px 44px',
+  '--shell-text-primary': 'var(--text)',
+  '--shell-text-secondary': 'var(--muted)',
+  '--shell-text-tertiary': 'var(--soft)',
+  '--shell-border': 'var(--border)',
+  '--shell-accent': 'var(--blue)',
+  '--shell-accent-strong': 'var(--blue)',
+  '--shell-topbar-margin': '14px',
+  '--component-section-title-size': '22px',
+  '--component-section-title-spacing': '-0.04em',
+  '--component-metric-value-size': '42px',
+})}
     }
 
     * { box-sizing: border-box; }
@@ -49,62 +67,7 @@ const videoLabHtml = `<!doctype html>
       mask-image: linear-gradient(180deg, rgba(0,0,0,0.75), transparent 92%);
     }
     a { color: inherit; text-decoration: none; }
-    .app-shell { max-width: 1540px; margin: 0 auto; padding: 24px 24px 44px; }
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      isolation: isolate;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 18px;
-      align-items: center;
-      padding: 16px 18px;
-      margin-bottom: 14px;
-      background: linear-gradient(180deg, rgba(2, 7, 12, 0.98), rgba(7, 16, 25, 0.94));
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      backdrop-filter: blur(24px) saturate(1.28);
-      box-shadow:
-        0 28px 78px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-    .topbar::before {
-      content: "";
-      position: absolute;
-      inset: -58% -10% auto;
-      height: 210%;
-      border-radius: inherit;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(6, 10, 15, 0.96), transparent 72%),
-        linear-gradient(180deg, rgba(3, 7, 12, 0.94), rgba(3, 7, 12, 0));
-      filter: blur(34px);
-      opacity: 0.96;
-      pointer-events: none;
-      z-index: -2;
-    }
-    .topbar::after {
-      content: "";
-      position: absolute;
-      inset: 1px;
-      border-radius: inherit;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
-        radial-gradient(circle at 84% 0%, rgba(255, 158, 82, 0.12), transparent 24%);
-      pointer-events: none;
-      z-index: -1;
-    }
-    .brand { display: inline-flex; align-items: center; gap: 14px; min-width: 0; }
-    .brand-mark {
-      width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center;
-      background:
-        radial-gradient(circle at 32% 34%, rgba(255, 164, 84, 0.46), transparent 36%),
-        linear-gradient(145deg, rgba(22, 35, 53, 0.98), rgba(6, 12, 19, 0.96));
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 30px rgba(255, 138, 45, 0.12);
-      color: #f6f9fc; font-weight: 700; font-size: 20px; letter-spacing: -0.06em;
-    }
+${renderSharedShellStyles()}
     .brand-kicker, .eyebrow, .section-subtle, .pill, .detail-label {
       font-family: "IBM Plex Mono", monospace;
       text-transform: uppercase;
@@ -112,38 +75,6 @@ const videoLabHtml = `<!doctype html>
       font-size: 11px;
     }
     .brand-kicker, .eyebrow { color: var(--blue); }
-    .brand-title { font-size: 24px; font-weight: 700; letter-spacing: -0.05em; }
-    .nav {
-      display: inline-flex; gap: 10px; padding: 6px; border-radius: 999px;
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-      justify-self: center; flex-wrap: nowrap; max-width: 100%; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
-    }
-    .nav::-webkit-scrollbar { display: none; }
-    .nav a {
-      display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px;
-      color: var(--muted); font-size: 13px; font-weight: 600;
-    }
-    .nav a.active {
-      color: var(--text);
-      background: linear-gradient(135deg, rgba(121, 188, 255, 0.18), rgba(255, 158, 82, 0.12));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-    .topbar-meta { display: inline-flex; align-items: center; gap: 12px; justify-self: end; flex-wrap: wrap; }
-    .heartbeat-strip {
-      width: 132px; height: 28px; display: grid; grid-template-columns: repeat(18, minmax(0, 1fr)); gap: 4px; align-items: end;
-    }
-    .heartbeat-strip span {
-      display: block; width: 100%; border-radius: 999px;
-      background: linear-gradient(180deg, rgba(121, 188, 255, 0.96), rgba(255, 158, 82, 0.62));
-      height: 26%; opacity: 0.46; transform-origin: center bottom;
-      animation: beat 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * 90ms);
-    }
-    .clock, .sync-chip {
-      padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05); white-space: nowrap; font-size: 13px;
-    }
-    .clock { font-family: "IBM Plex Mono", monospace; }
-    .sync-chip strong { color: var(--text); font-weight: 600; }
     .panel {
       position: relative; overflow: hidden; background: var(--panel); border: 1px solid var(--border);
       border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(16px);
@@ -167,14 +98,10 @@ const videoLabHtml = `<!doctype html>
     .hero h1 { margin: 0; font-size: clamp(3rem, 6vw, 5.2rem); line-height: 0.9; letter-spacing: -0.07em; max-width: 8ch; }
     .hero-copy p, .hero-copy .copy { margin: 18px 0 0; max-width: 62ch; color: var(--muted); font-size: 1.02rem; line-height: 1.8; }
     .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
-    .button-link {
-      display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px;
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); font-size: 14px; font-weight: 600;
-    }
-    .button-link.primary { background: linear-gradient(135deg, rgba(121, 188, 255, 0.18), rgba(255, 158, 82, 0.12)); }
-    .telemetry-card, .section-card {
-      padding: 20px; border-radius: var(--radius); background: var(--panel-2); border: 1px solid var(--border);
-      box-shadow: 0 20px 54px rgba(0, 0, 0, 0.24);
+${sharedComponentStyles}
+    .telemetry-card {
+      padding: 20px; border-radius: var(--component-section-radius); background: var(--component-section-bg);
+      border: var(--component-section-border); box-shadow: var(--component-section-shadow);
     }
     .telemetry-label, .section-subtle, .detail-label { color: var(--soft); }
     .telemetry-title { font-size: 30px; font-weight: 700; letter-spacing: -0.05em; margin: 10px 0; }
@@ -185,28 +112,18 @@ const videoLabHtml = `<!doctype html>
       color: var(--muted); font-size: 14px; line-height: 1.6;
     }
     .telemetry-row strong, .detail-row strong { color: var(--text); font-weight: 600; text-align: right; }
-    .metric-grid, .main-grid { display: grid; gap: 18px; margin-top: 18px; }
+    .main-grid { display: grid; gap: 18px; margin-top: 18px; }
     .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .main-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); align-items: start; }
     .main-grid > .section-card:last-child { grid-column: span 2; }
-    .metric-card {
-      padding: 20px; border-radius: var(--radius-md); background: var(--panel-2);
-      border: 1px solid var(--border); box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
-    }
     .metric-value { font-size: 42px; letter-spacing: -0.06em; font-weight: 700; margin-bottom: 8px; }
     .metric-copy { color: var(--muted); line-height: 1.6; font-size: 14px; }
-    .section-header { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 16px; }
-    .section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.04em; }
     .card {
       padding: 18px; border-radius: var(--radius-md); background: rgba(255,255,255,0.03); border: 1px solid var(--border);
     }
     .card.clip { border-left: 4px solid rgba(121, 188, 255, 0.84); padding-left: 14px; }
     .card.scene { border-left: 4px solid rgba(255, 158, 82, 0.84); padding-left: 14px; }
     .card.export { border-left: 4px solid rgba(53, 211, 163, 0.84); padding-left: 14px; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: var(--muted); white-space: nowrap;
-    }
     .card-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
     .card-title { font-size: 16px; font-weight: 600; line-height: 1.4; letter-spacing: -0.02em; }
     .card-copy { color: var(--muted); font-size: 14px; line-height: 1.7; }
@@ -224,27 +141,10 @@ const videoLabHtml = `<!doctype html>
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">F</div>
-        <div class="brand-copy">
-          <div class="brand-kicker">Autonomous Business Operating System</div>
-          <div class="brand-title">Forge Video Lab</div>
-        </div>
-      </div>
-      <nav class="nav" aria-label="Primary">
-        <a href="/"><i class="fa-solid fa-satellite-dish"></i> Command</a>
-        <a href="/review"><i class="fa-solid fa-shield-halved"></i> Review</a>
-        <a href="/x-posts"><i class="fa-brands fa-x-twitter"></i> Broadcast</a>
-        <a href="/story"><i class="fa-solid fa-timeline"></i> Story</a>
-        <a class="active" href="/launchpad"><i class="fa-solid fa-rocket"></i> Launch</a>
-      </nav>
-      <div class="topbar-meta">
-        <div class="heartbeat-strip" id="heartbeat-strip"></div>
-        <div class="clock" id="clock">--:--:-- ET</div>
-        <div class="sync-chip" id="sync-chip"><strong>Awaiting sync</strong></div>
-      </div>
-    </header>
+${renderTopbar({
+  title: 'Forge Video Lab',
+  activePath: '/launchpad',
+})}
 
     <section class="panel hero">
       <div class="hero-copy">
