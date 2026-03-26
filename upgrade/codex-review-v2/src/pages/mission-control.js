@@ -106,13 +106,13 @@ const missionControlHtml = `<!doctype html>
     .topbar::before {
       content: "";
       position: absolute;
-      inset: -58% -10% auto;
-      height: 210%;
+      inset: -28% -6% auto;
+      height: 140%;
       border-radius: inherit;
       background:
         radial-gradient(circle at 50% 0%, rgba(6, 10, 15, 0.96), transparent 72%),
         linear-gradient(180deg, rgba(3, 7, 12, 0.94), rgba(3, 7, 12, 0));
-      filter: blur(34px);
+      filter: blur(30px);
       opacity: 0.96;
       pointer-events: none;
       z-index: -2;
@@ -303,6 +303,9 @@ const missionControlHtml = `<!doctype html>
     }
 
     .hero {
+      position: relative;
+      z-index: 1;
+      isolation: isolate;
       display: grid;
       grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
       gap: 20px;
