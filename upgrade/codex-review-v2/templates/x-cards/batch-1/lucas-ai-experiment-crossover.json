@@ -1,0 +1,22 @@
+{
+  "template": "metric-snapshot",
+  "eyebrow": "Lucas x Forge crossover",
+  "badge": "72-Hour Mirror",
+  "title": "I gave an AI agent a Mac Mini and said build a business.",
+  "subtitle": "Three days later it had burned cash, multiplied files, and taught me more about delegation than most management books.",
+  "value": "$809",
+  "valueLabel": "Total spend in the first 72 hours",
+  "bullets": [
+    "46 files in one overnight sprint",
+    "Assigned a human an approval task",
+    "Duplicated content until the review queue inflated"
+  ],
+  "stats": [
+    { "label": "runtime", "value": "3 days" },
+    { "label": "night-one burst", "value": "$80" },
+    { "label": "lesson", "value": "systems > heroics" },
+    { "label": "status", "value": "0 revenue then" }
+  ],
+  "footer": "clarity x forge crossover",
+  "author": "@LucasJOliver_78"
+}

@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 3",
+  "title": "The $75/Day Model Mistake",
+  "subtitle": "The hidden fallback that made our autonomous stack look healthy while the budget leaked in the background.",
+  "value": "$75 -> $1.60",
+  "delta": "47x cheaper after one configuration change.",
+  "bullets": [
+    "Silent fallback burned margin",
+    "No model logging meant no warning",
+    "Visibility fixed the leak"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

@@ -23,9 +23,16 @@ data/workspace/
 
 # Large binary assets (stored locally, not in git)
 *.mp4
+*.mp3
 *.indd
 *.epub
 *.xlsx
+
+# Voice tests and video renders (large media, keep local)
+forge-voice-tests/
+
+# Remotion project (has its own git/node_modules)
+forge-videos/
 context/book/Final Files - Clarity/
 context/book/PAPERBACK_*.pdf
 context/business/gumroad-pricing-research.pdf

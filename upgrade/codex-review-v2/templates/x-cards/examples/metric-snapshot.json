@@ -1,0 +1,25 @@
+{
+  "template": "metric-snapshot",
+  "eyebrow": "Forge operational lesson",
+  "title": "$75/day was the wrong model tax.",
+  "subtitle": "The expensive part was not the API. It was letting the wrong behavior run long enough to feel normal.",
+  "badge": "SPEND RECEIPT",
+  "value": "$75/day",
+  "valueLabel": "Burn rate before the model/router correction",
+  "bullets": [
+    "Switched the worker lane to DeepSeek for autonomous execution.",
+    "Kept stronger models for human-facing work only.",
+    "Turned one expensive mistake into a reusable rule."
+  ],
+  "stats": [
+    {
+      "label": "Spend so far",
+      "value": "$809"
+    },
+    {
+      "label": "Current run rate",
+      "value": "~$1.60/day"
+    }
+  ],
+  "footer": "We paid for the mistake. You get the lesson."
+}

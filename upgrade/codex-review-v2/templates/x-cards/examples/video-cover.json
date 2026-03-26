@@ -1,0 +1,19 @@
+{
+  "template": "video-cover",
+  "width": 1080,
+  "height": 1920,
+  "eyebrow": "Forge video hook",
+  "badge": "Roger voiceover",
+  "title": "$75/day",
+  "quote": "We were hemorrhaging money in our sleep.",
+  "subtitle": "The hidden model fallback that turned an autonomous system into a budget leak.",
+  "metaLine": "Short-form launch cover",
+  "author": "@Forge_Builds",
+  "footer": "buildwhatlasts.app/forge",
+  "stats": [
+    { "label": "before", "value": "$75/day" },
+    { "label": "after", "value": "$1.60/day" },
+    { "label": "fix", "value": "1 config" },
+    { "label": "savings", "value": "47x" }
+  ]
+}

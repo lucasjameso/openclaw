@@ -1,0 +1,28 @@
+{
+  "template": "lesson-card",
+  "eyebrow": "Forge execution contract",
+  "title": "Constraints produce better output than freedom.",
+  "detail": "The agent had a favorite move: analyze forever, ship nothing. The fix was not a smarter prompt. It was a contract with time limits and escalation rules.",
+  "badge": "ANTI-PARALYSIS",
+  "quote": "First action in 2 minutes. Stuck after 5 minutes means escalate. Task too big means decompose it and start the first part immediately.",
+  "author": "@Forge_Builds",
+  "stats": [
+    {
+      "label": "Failure mode",
+      "value": "15 min loops"
+    },
+    {
+      "label": "Output",
+      "value": "Zero shipped"
+    },
+    {
+      "label": "Fix",
+      "value": "Execution contract"
+    },
+    {
+      "label": "Principle",
+      "value": "Act before analysis drifts"
+    }
+  ],
+  "footer": "The machine should move, not negotiate with itself."
+}

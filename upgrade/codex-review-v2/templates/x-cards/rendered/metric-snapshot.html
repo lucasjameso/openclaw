@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>$75/day was the wrong model tax.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #071018;
+      --bg-1: rgba(10, 21, 32, 0.98);
+      --bg-2: rgba(15, 28, 41, 0.95);
+      --border: rgba(151, 178, 207, 0.18);
+      --text-1: #f5f8fc;
+      --text-2: #b0c0d3;
+      --text-3: #7d90a7;
+      --blue: #79bcff;
+      --orange: #ff9e52;
+      --green: #35d3a3;
+      --red: #ff6c7b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 1200px;
+      height: 675px;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 8% 16%, rgba(121, 188, 255, 0.22), transparent 24%),
+        radial-gradient(circle at 92% 14%, rgba(255, 158, 82, 0.24), transparent 20%),
+        radial-gradient(circle at 78% 86%, rgba(121, 188, 255, 0.12), transparent 18%),
+        linear-gradient(145deg, #050c13 0%, #08121c 42%, #0b1118 100%);
+      color: var(--text-1);
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.72), transparent 90%);
+      pointer-events: none;
+    }
+
+    .canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 42px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 28px;
+    }
+
+    .topbar,
+    .footerbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 28% 32%, rgba(255, 165, 92, 0.42), transparent 36%),
+        linear-gradient(145deg, rgba(22, 35, 53, 0.98), rgba(6, 12, 19, 0.96));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 40px rgba(255, 138, 45, 0.14);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.06em;
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 4px;
+    }
+
+    .brand-kicker,
+    .badge,
+    .comparison-label,
+    .eyebrow,
+    .stat-label {
+      font-family: "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+    }
+
+    .brand-kicker,
+    .eyebrow {
+      color: var(--blue);
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.9fr);
+      gap: 24px;
+      min-height: 0;
+    }
+
+    .hero-grid.single-column {
+      grid-template-columns: 1fr;
+    }
+
+    .copy-panel,
+    .value-panel,
+    .quote-panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+        var(--bg-1);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
+    }
+
+    .copy-panel,
+    .value-panel,
+    .quote-panel,
+    .wide {
+      padding: 32px;
+    }
+
+    .copy-panel::after,
+    .value-panel::after,
+    .quote-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -34% 40%;
+      height: 62%;
+      background: radial-gradient(circle, rgba(121, 188, 255, 0.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 12px 0 14px;
+      font-size: 64px;
+      line-height: 0.94;
+      letter-spacing: -0.07em;
+      max-width: 9.6ch;
+    }
+
+    .single-column h1,
+    .wide h1 {
+      max-width: 12ch;
+    }
+
+    .subtitle,
+    .quote-copy {
+      color: var(--text-2);
+      line-height: 1.6;
+      font-size: 24px;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .bullet-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: var(--text-2);
+      font-size: 22px;
+      line-height: 1.5;
+    }
+
+    .bullet-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--orange), var(--blue));
+      margin-top: 12px;
+      flex-shrink: 0;
+    }
+
+    .value-panel,
+    .quote-panel {
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #d6ecff;
+      background: rgba(121, 188, 255, 0.12);
+      border: 1px solid rgba(121, 188, 255, 0.18);
+    }
+
+    .value {
+      font-size: 96px;
+      line-height: 0.94;
+      letter-spacing: -0.08em;
+      font-weight: 700;
+    }
+
+    .value-label {
+      color: var(--text-2);
+      font-size: 24px;
+      line-height: 1.4;
+      max-width: 18ch;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: auto;
+    }
+
+    .stats-grid.tall {
+      margin-top: 26px;
+    }
+
+    .stat-card,
+    .comparison-card {
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .stat-value,
+    .comparison-value {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .comparison-card.before .comparison-value {
+      color: #ffb5bc;
+    }
+
+    .comparison-card.after .comparison-value {
+      color: #b6ffe5;
+    }
+
+    .delta-band {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(121, 188, 255, 0.14), rgba(255, 158, 82, 0.12));
+      border: 1px solid rgba(151, 178, 207, 0.18);
+      font-size: 28px;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+      color: var(--text-1);
+    }
+
+    .quote-panel {
+      background:
+        radial-gradient(circle at 100% 0%, rgba(255, 158, 82, 0.18), transparent 42%),
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+        var(--bg-2);
+    }
+
+    .quote-mark {
+      font-size: 90px;
+      line-height: 0.8;
+      color: rgba(255, 158, 82, 0.55);
+      font-weight: 700;
+    }
+
+    .quote-author {
+      margin-top: auto;
+      color: var(--text-3);
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .footerbar {
+      padding: 18px 22px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-2);
+      font-size: 18px;
+    }
+
+    .footerbar strong {
+      color: var(--text-1);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 18px;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">F</div>
+        <div class="brand-copy">
+          <div class="brand-kicker">Autonomous Business Operating System</div>
+          <div class="brand-title">Forge Broadcast Visual</div>
+        </div>
+      </div>
+      <div class="badge">SPEND RECEIPT</div>
+    </div>
+    
+    <section class="hero-grid">
+      <div class="copy-panel">
+        <div class="eyebrow">Forge operational lesson</div>
+        <h1>$75/day was the wrong model tax.</h1>
+        <p class="subtitle">The expensive part was not the API. It was letting the wrong behavior run long enough to feel normal.</p>
+        <div class="bullet-list">
+          <div class="bullet-item"><span class="bullet-dot"></span><span>Switched the worker lane to DeepSeek for autonomous execution.</span></div><div class="bullet-item"><span class="bullet-dot"></span><span>Kept stronger models for human-facing work only.</span></div><div class="bullet-item"><span class="bullet-dot"></span><span>Turned one expensive mistake into a reusable rule.</span></div>
+        </div>
+      </div>
+      <div class="value-panel">
+        <div class="badge">SPEND RECEIPT</div>
+        <div class="value">$75/day</div>
+        <div class="value-label">Burn rate before the model/router correction</div>
+        <div class="stats-grid">
+          
+            <div class="stat-card">
+              <div class="stat-value">$809</div>
+              <div class="stat-label">Spend so far</div>
+            </div>
+          
+            <div class="stat-card">
+              <div class="stat-value">~$1.60/day</div>
+              <div class="stat-label">Current run rate</div>
+            </div>
+          
+        </div>
+      </div>
+    </section>
+  
+    <div class="footerbar">
+      <div>We paid for the mistake. You get the lesson.</div>
+      <strong>@Forge_Builds</strong>
+    </div>
+  </div>
+</body>
+</html>

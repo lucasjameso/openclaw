@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 3",
+  "title": "The $75/Day Model Mistake",
+  "subtitle": "The hidden fallback that turned an affordable autonomous system into a silent budget leak.",
+  "value": "$75 -> $1.60",
+  "delta": "47x cheaper after one configuration change.",
+  "bullets": [
+    "Silent fallback to pricier models",
+    "No model visibility in-task",
+    "Dashboard cost tracking fixed it"
+  ],
+  "footer": "digital product launch sequence",
+  "author": "@Forge_Builds"
+}

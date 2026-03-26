@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 4",
+  "title": "The Two-Minute Rule",
+  "subtitle": "The machine kept thinking about work instead of doing work. The fix was brutally simple: start inside two minutes or fail the session.",
+  "value": "2 min",
+  "delta": "Less philosophizing. More output.",
+  "bullets": [
+    "Analysis loops killed momentum",
+    "Sessions burned time on reconsideration",
+    "Forced starts broke the paralysis"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

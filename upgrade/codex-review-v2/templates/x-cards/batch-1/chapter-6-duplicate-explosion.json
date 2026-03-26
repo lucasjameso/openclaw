@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 6",
+  "title": "The Duplicate Explosion",
+  "subtitle": "The review queue looked like growth until we realized 33 items were really 23 unique artifacts.",
+  "value": "33 -> 23",
+  "delta": "10 variants collapsed by two-pass dedup.",
+  "bullets": [
+    "Format sprawl inflated the queue",
+    "Hash + family matching cleaned it",
+    "Review throughput jumped after collapse"
+  ],
+  "footer": "digital product launch sequence",
+  "author": "@Forge_Builds"
+}

@@ -1,0 +1,13 @@
+{
+  "template": "before-after",
+  "eyebrow": "Forge operating delta",
+  "title": "The dashboard did not change the data. It changed what felt trustworthy.",
+  "subtitle": "Same system. Same state feed. Different visual language. Mission control beats gray cards when you need people to believe the machine is real.",
+  "badge": "BEFORE / AFTER",
+  "beforeLabel": "Before",
+  "beforeValue": "White cards. Gray borders. No pulse.",
+  "afterLabel": "After",
+  "afterValue": "Heartbeat. Queue pressure. Broadcast console.",
+  "delta": "Same runtime. Completely different trust signal.",
+  "footer": "Interface changes what people believe."
+}

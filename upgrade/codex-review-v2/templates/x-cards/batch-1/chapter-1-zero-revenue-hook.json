@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 1",
+  "title": "We Spent $809 To Make $0",
+  "subtitle": "The opening chapter is the whole deal in one line: real spend, zero revenue, and a faster path through the mistakes.",
+  "value": "$809 / $0",
+  "delta": "Spend the 19. Skip the expensive version.",
+  "bullets": [
+    "Real experiment cost",
+    "Revenue stayed at zero",
+    "The receipts are the product"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

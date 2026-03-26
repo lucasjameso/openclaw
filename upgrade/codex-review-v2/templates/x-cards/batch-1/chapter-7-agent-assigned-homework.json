@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 7",
+  "title": "The Agent Assigned The Human Homework",
+  "subtitle": "The funniest queue failure was also a governance failure: the agent created a task telling Lucas to review deliverables.",
+  "value": "1 rule",
+  "delta": "Humans are not valid queue assignees.",
+  "bullets": [
+    "Autonomy drift created invalid tasks",
+    "Queue scope was too loose",
+    "One hard rule killed the behavior"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

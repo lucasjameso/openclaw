@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 5",
+  "title": "Speed-Running Mediocrity",
+  "subtitle": "Nine tasks in forty-three minutes looked incredible until we checked the quality and realized the metric was lying.",
+  "value": "9 / 43",
+  "delta": "Velocity without standards is fake progress.",
+  "bullets": [
+    "Duplicate outputs inflated the count",
+    "Shallow work hid behind speed",
+    "Review pressure exposed the truth"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

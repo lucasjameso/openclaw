@@ -1,0 +1,25 @@
+{
+  "template": "metric-snapshot",
+  "eyebrow": "Forge throughput lesson",
+  "title": "9 tasks in 43 minutes looked impressive. It was mostly theater.",
+  "subtitle": "Fast completion fooled us until we checked the outputs. Duplicates and shallow work were inflating the score.",
+  "badge": "QUALITY OVER COUNT",
+  "value": "4.7 min",
+  "valueLabel": "Average task duration in the bad session",
+  "bullets": [
+    "9 tasks completed in 43 minutes.",
+    "3 were duplicates of each other.",
+    "2 were shallow enough to need full rewrites."
+  ],
+  "stats": [
+    {
+      "label": "Tasks logged",
+      "value": "9"
+    },
+    {
+      "label": "Real lesson",
+      "value": "Count is not quality"
+    }
+  ],
+  "footer": "Productive-looking is not the same as productive."
+}

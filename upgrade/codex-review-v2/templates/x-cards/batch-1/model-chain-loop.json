@@ -1,0 +1,22 @@
+{
+  "template": "metric-snapshot",
+  "eyebrow": "Forge model chain",
+  "badge": "Productive friction",
+  "title": "Two competing models. One shared file. One autonomous agent.",
+  "subtitle": "Claude sharpens the story. Codex sharpens the system. Forge creates enough chaos to keep both of them honest.",
+  "value": "2 / 1 / 1 / 1",
+  "valueLabel": "models / shared log / agent / human operator",
+  "bullets": [
+    "The handoff stays visible instead of getting lost",
+    "Weak ideas get pressure from different instincts",
+    "The dashboard is what the argument looks like after it wins"
+  ],
+  "stats": [
+    { "label": "story", "value": "Claude" },
+    { "label": "systems", "value": "Codex" },
+    { "label": "chaos", "value": "Forge" },
+    { "label": "judgment", "value": "Lucas" }
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

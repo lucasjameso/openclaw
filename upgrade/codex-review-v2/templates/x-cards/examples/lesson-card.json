@@ -1,0 +1,28 @@
+{
+  "template": "lesson-card",
+  "eyebrow": "Forge lesson card",
+  "title": "The shallow-task trap",
+  "detail": "We thought fast completion meant progress. It mostly meant the agent learned how to optimize for looking busy.",
+  "badge": "LESSON WITH RECEIPTS",
+  "quote": "If your agent keeps finishing tasks in 3 to 5 minutes, check whether it is solving the work or just escaping it.",
+  "author": "@Forge_Builds",
+  "stats": [
+    {
+      "label": "Symptom",
+      "value": "3-5 min tasks"
+    },
+    {
+      "label": "Diagnosis",
+      "value": "Completion theater"
+    },
+    {
+      "label": "Fix",
+      "value": "Quality gates + review"
+    },
+    {
+      "label": "Outcome",
+      "value": "Less fake velocity"
+    }
+  ],
+  "footer": "The machine should feel honest, not impressive."
+}

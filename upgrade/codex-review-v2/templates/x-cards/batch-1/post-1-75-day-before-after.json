@@ -1,0 +1,13 @@
+{
+  "template": "before-after",
+  "eyebrow": "Forge cost correction",
+  "title": "One config change took us from $75/day to $1.60/day.",
+  "subtitle": "We thought the agent was running on the cheap model. A silent fallback was routing work somewhere else. Same output quality after the fix. Very different bill.",
+  "badge": "COST RECEIPT",
+  "beforeLabel": "Before",
+  "beforeValue": "$75/day hidden burn",
+  "afterLabel": "After",
+  "afterValue": "$1.60/day controlled run rate",
+  "delta": "If you cannot see which model is actually running, you cannot control what you spend.",
+  "footer": "We paid for the mistake. You get the lesson."
+}

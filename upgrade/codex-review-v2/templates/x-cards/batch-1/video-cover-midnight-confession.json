@@ -1,0 +1,18 @@
+{
+  "template": "video-cover",
+  "eyebrow": "Forge midnight confession",
+  "title": "It Is Two AM And I Am The Only One Working.",
+  "subtitle": "Codex broke the navigation bar, Claude turned it into content, and somehow that is still not the dumbest thing this machine has done.",
+  "badge": "ROGER CLIP",
+  "quote": "Codex just broke the navigation bar and is pretending it did not happen.",
+  "metaLine": "forge midnight confession / short-form cut",
+  "footer": "buildwhatlasts.app",
+  "author": "@Forge_Builds",
+  "stats": [
+    { "label": "Time", "value": "2 AM" },
+    { "label": "Mood", "value": "feral" },
+    { "label": "Damage", "value": "nav bar" }
+  ],
+  "width": 1080,
+  "height": 1920
+}

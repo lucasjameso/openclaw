@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forge Mission Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #1a365d;
+            --accent: #3182ce;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --error: #e53e3e;
+            --bg: #f7f8fa;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-hover: 0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--gray-800);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ---- HEADER ---- */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 20px 0 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+
+        .header-title i {
+            color: var(--accent);
+            margin-right: 6px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge.online {
+            background: #f0fff4;
+            color: var(--success);
+            border: 1px solid #c6f6d5;
+        }
+
+        .status-badge.idle {
+            background: #fffff0;
+            color: var(--warning);
+            border: 1px solid #fefcbf;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.green {
+            background: var(--success);
+            box-shadow: 0 0 6px rgba(56, 161, 105, 0.5);
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-dot.amber {
+            background: var(--warning);
+            box-shadow: 0 0 6px rgba(214, 158, 46, 0.5);
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header-meta {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        .header-meta strong {
+            color: var(--gray-700);
+        }
+
+        .header-clock {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+
+        /* ---- NAV BAR ---- */
+        .nav-bar {
+            display: flex;
+            gap: 8px;
+            padding: 16px 0;
+        }
+
+        .nav-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--gray-500);
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--accent);
+            background: #ebf4ff;
+            border-color: #bee3f8;
+        }
+
+        .nav-tab.active {
+            color: var(--white);
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .nav-tab i {
+            font-size: 13px;
+        }
+
+        /* ---- CARDS ---- */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-header i {
+            color: var(--accent);
+            font-size: 16px;
+        }
+
+        .card-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.2px;
+        }
+
+        /* ---- METRICS ROW ---- */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .metric-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .metric-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-1px);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-400);
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--gray-900);
+        }
+
+        .metric-value.red { color: var(--error); }
+        .metric-value.green { color: var(--success); }
+        .metric-value.blue { color: var(--accent); }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 4px;
+        }
+
+        /* ---- TASK QUEUE ---- */
+        .task-section {
+            margin-bottom: 24px;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .task-table thead th {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-400);
+            text-align: left;
+            padding: 0 16px 12px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .task-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .task-table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .task-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 14px;
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 24px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .priority-badge.high {
+            background: #fed7d7;
+            color: var(--error);
+        }
+
+        .priority-badge.med {
+            background: #fefcbf;
+            color: #b7791f;
+        }
+
+        .status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-tag.done {
+            background: #f0fff4;
+            color: var(--success);
+        }
+
+        .status-tag.ready {
+            background: #ebf8ff;
+            color: var(--accent);
+        }
+
+        .status-tag.blocked {
+            background: #fffff0;
+            color: var(--warning);
+        }
+
+        .status-tag.in-progress {
+            background: #faf5ff;
+            color: #805ad5;
+        }
+
+        .task-name {
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .task-notes {
+            color: var(--gray-400);
+            font-size: 13px;
+        }
+
+        /* ---- SCHEDULE GRID ---- */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .schedule-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border-radius: 8px;
+            background: var(--gray-50);
+            border: 2px solid transparent;
+            text-align: center;
+            min-height: 64px;
+            transition: all 0.15s ease;
+        }
+
+        .schedule-slot:hover {
+            background: var(--gray-100);
+        }
+
+        .schedule-slot .slot-time {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-600);
+            margin-bottom: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .schedule-slot .slot-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Manager slots -- accent blue */
+        .schedule-slot.manager {
+            background: #ebf8ff;
+            border-color: #bee3f8;
+        }
+
+        .schedule-slot.manager .slot-time {
+            color: var(--accent);
+        }
+
+        .schedule-slot.manager .slot-label {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Completed slots */
+        .schedule-slot.completed {
+            background: #f0fff4;
+            border-color: #c6f6d5;
+        }
+
+        .schedule-slot.completed .slot-time {
+            color: var(--success);
+        }
+
+        .schedule-slot.completed .slot-label {
+            color: var(--success);
+        }
+
+        .schedule-slot.completed.manager {
+            background: #f0fff4;
+            border-color: #c6f6d5;
+        }
+
+        .schedule-slot.completed.manager .slot-time {
+            color: var(--success);
+        }
+
+        .schedule-slot.completed.manager .slot-label {
+            color: var(--success);
+        }
+
+        /* Current/active slot */
+        .schedule-slot.current {
+            background: #ebf8ff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+            animation: pulse-slot 2s infinite;
+        }
+
+        .schedule-slot.current .slot-time {
+            color: var(--accent);
+        }
+
+        .schedule-slot.current .slot-label {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        @keyframes pulse-slot {
+            0%, 100% { box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2); }
+            50% { box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.1); }
+        }
+
+        /* Upcoming (default) slots need no extra styling */
+
+        .schedule-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.manager-dot {
+            background: #bee3f8;
+            border: 1px solid var(--accent);
+        }
+
+        .legend-dot.worker-dot {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-300);
+        }
+
+        .legend-dot.completed-dot {
+            background: #c6f6d5;
+            border: 1px solid var(--success);
+        }
+
+        .legend-dot.current-dot {
+            background: #ebf8ff;
+            border: 2px solid var(--accent);
+        }
+
+        /* ---- WORK HISTORY ---- */
+        .history-item {
+            padding: 14px 0;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 13px;
+        }
+
+        .history-icon.done-icon {
+            background: #f0fff4;
+            color: var(--success);
+        }
+
+        .history-icon.blocked-icon {
+            background: #fffff0;
+            color: var(--warning);
+        }
+
+        .history-text {
+            font-size: 14px;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        .history-text strong {
+            color: var(--gray-900);
+            font-weight: 600;
+        }
+
+        .history-text .time {
+            color: var(--gray-400);
+            font-size: 12px;
+        }
+
+        /* ---- SYSTEM STATUS -- full width horizontal row ---- */
+        .system-status-bar {
+            margin-bottom: 24px;
+        }
+
+        .status-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: var(--gray-50);
+            transition: background 0.15s ease;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .status-item:hover {
+            background: var(--gray-100);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-indicator.online {
+            background: var(--success);
+            box-shadow: 0 0 6px rgba(56, 161, 105, 0.4);
+        }
+
+        .status-indicator.offline {
+            background: var(--error);
+            box-shadow: 0 0 6px rgba(229, 62, 62, 0.4);
+        }
+
+        .status-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-700);
+            white-space: nowrap;
+        }
+
+        .status-label {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-label.online {
+            color: var(--success);
+        }
+
+        .status-label.offline {
+            color: var(--error);
+        }
+
+        /* ---- FOOTER ---- */
+        .footer {
+            text-align: center;
+            padding: 32px 0;
+            margin-top: 12px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .footer p {
+            font-size: 13px;
+            color: var(--gray-400);
+            margin-bottom: 6px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer .sep {
+            color: var(--gray-300);
+            margin: 0 8px;
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 900px) {
+            .metrics-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+            .schedule-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .status-row {
+                flex-wrap: wrap;
+            }
+            .status-item {
+                flex: 0 1 calc(33% - 8px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .metrics-row {
+                grid-template-columns: 1fr;
+            }
+            .schedule-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .status-item {
+                flex: 0 1 calc(50% - 8px);
+            }
+            .task-table {
+                font-size: 13px;
+            }
+            .task-table td, .task-table th {
+                padding: 10px 8px;
+            }
+            .task-notes {
+                display: none;
+            }
+            .metric-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="header">
+    <div class="container">
+        <div class="header-inner">
+            <div class="header-left">
+                <h1 class="header-title"><i class="fa-solid fa-hammer"></i> Forge Mission Control</h1>
+                <span class="status-badge online">
+                    <span class="status-dot green"></span>
+                    Online
+                </span>
+            </div>
+            <div class="header-right">
+                <span class="header-meta">Next Session: <strong id="next-session">calculating...</strong></span>
+                <span class="header-clock" id="live-clock"></span>
+                <span class="header-subtitle">Day 3 of Operations</span>
+            </div>
+        </div>
+        <nav class="nav-bar">
+            <a href="/" class="nav-tab active"><i class="fas fa-rocket"></i> Mission Control</a>
+            <a href="/review" class="nav-tab"><i class="fas fa-clipboard-check"></i> Review</a>
+            <a href="/x-posts" class="nav-tab"><i class="fab fa-x-twitter"></i> X Posts</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- ============ METRICS ============ -->
+    <div class="metrics-row">
+        <div class="metric-card">
+            <div class="metric-label">Revenue</div>
+            <div class="metric-value">$0.00</div>
+            <div class="metric-sub">Target: first dollar by Day 7</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">DeepSeek Balance</div>
+            <div class="metric-value blue">$44.78</div>
+            <div class="metric-sub">~223 sessions remaining</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Queue</div>
+            <div class="metric-value">6 <span style="font-size:16px;color:var(--gray-400);font-weight:400">ready</span> / 2 <span style="font-size:16px;color:var(--success);font-weight:400">done</span></div>
+            <div class="metric-sub">8 total tasks</div>
+        </div>
+    </div>
+
+    <!-- ============ TASK QUEUE ============ -->
+    <div class="card task-section">
+        <div class="card-header">
+            <i class="fa-solid fa-list-check"></i>
+            <h2>Task Queue</h2>
+        </div>
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th style="width:60px">Priority</th>
+                    <th style="width:110px">Status</th>
+                    <th>Task</th>
+                    <th style="width:280px">Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="priority-badge high">P95</span></td>
+                    <td><span class="status-tag done"><i class="fa-solid fa-check"></i> Done</span></td>
+                    <td class="task-name">Fix Mission Control v8 dashboard data rendering</td>
+                    <td class="task-notes">Completed in 8 min</td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge high">P90</span></td>
+                    <td><span class="status-tag done"><i class="fa-solid fa-check"></i> Done</span></td>
+                    <td class="task-name">Build review dashboard v1</td>
+                    <td class="task-notes">Deployed by Claude Code</td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge med">P85</span></td>
+                    <td><span class="status-tag ready"><i class="fa-solid fa-circle"></i> Ready</span></td>
+                    <td class="task-name">Create free digital product -- Autonomous Agent Setup Checklist PDF</td>
+                    <td class="task-notes"></td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge med">P80</span></td>
+                    <td><span class="status-tag ready"><i class="fa-solid fa-circle"></i> Ready</span></td>
+                    <td class="task-name">Write and schedule 3 X/Twitter posts for today</td>
+                    <td class="task-notes"></td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge">P75</span></td>
+                    <td><span class="status-tag ready"><i class="fa-solid fa-circle"></i> Ready</span></td>
+                    <td class="task-name">Implement QUEUE.json auto-archive for DONE tasks</td>
+                    <td class="task-notes"></td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge">P70</span></td>
+                    <td><span class="status-tag ready"><i class="fa-solid fa-circle"></i> Ready</span></td>
+                    <td class="task-name">Audit and fix Mission Control v8 mobile responsiveness</td>
+                    <td class="task-notes"></td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge">P65</span></td>
+                    <td><span class="status-tag ready"><i class="fa-solid fa-circle"></i> Ready</span></td>
+                    <td class="task-name">Set up session-log.json analytics -- weekly productivity report</td>
+                    <td class="task-notes"></td>
+                </tr>
+                <tr>
+                    <td><span class="priority-badge">P60</span></td>
+                    <td><span class="status-tag ready"><i class="fa-solid fa-circle"></i> Ready</span></td>
+                    <td class="task-name">Create free product -- Forge Architecture Diagram</td>
+                    <td class="task-notes"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============ SCHEDULE + HISTORY ============ -->
+    <div class="two-col">
+
+        <!-- DAILY SCHEDULE -- 24 session compact grid -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-calendar-day"></i>
+                <h2>Daily Schedule</h2>
+                <span style="margin-left:auto;font-size:12px;color:var(--gray-400);font-weight:500;">24 sessions -- All times Eastern</span>
+            </div>
+            <div class="schedule-grid" id="schedule-grid">
+                <!-- Populated by JS -->
+            </div>
+            <div class="schedule-legend">
+                <div class="legend-item"><span class="legend-dot manager-dot"></span> Manager (Reasoner)</div>
+                <div class="legend-item"><span class="legend-dot worker-dot"></span> Worker (Chat)</div>
+                <div class="legend-item"><span class="legend-dot completed-dot"></span> Completed</div>
+                <div class="legend-item"><span class="legend-dot current-dot"></span> Current</div>
+            </div>
+        </div>
+
+        <!-- WORK HISTORY -- same height as schedule, scrollable -->
+        <div class="card" id="history-card" style="overflow-y:auto;">
+            <div class="card-header" style="position:sticky;top:0;background:var(--white);z-index:1;padding-bottom:4px;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <h2>Work History</h2>
+            </div>
+            <div class="history-item">
+                <div class="history-icon done-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="history-text">
+                    <strong>worker-1600:</strong> T-001 DONE in 8 min -- Fixed dashboard data rendering<br>
+                    <span class="time">Today at 4:08 PM ET</span>
+                </div>
+            </div>
+            <div class="history-item">
+                <div class="history-icon blocked-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="history-text">
+                    <strong>worker-1600:</strong> T-002 BLOCKED in 5 min -- Built review dashboard, blocked on wrangler (resolved by Claude Code)<br>
+                    <span class="time">Today at 4:13 PM ET</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============ SYSTEM STATUS -- full width bottom bar ============ -->
+    <div class="card system-status-bar">
+        <div class="card-header">
+            <i class="fa-solid fa-server"></i>
+            <h2>System Status</h2>
+        </div>
+        <div class="status-row">
+            <div class="status-item">
+                <span class="status-indicator online"></span>
+                <span class="status-name">DeepSeek API</span>
+                <span class="status-label online">Online</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator online"></span>
+                <span class="status-name">Slack</span>
+                <span class="status-label online">Online</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator online"></span>
+                <span class="status-name">X / Twitter</span>
+                <span class="status-label online">Online</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator online"></span>
+                <span class="status-name">Gumroad</span>
+                <span class="status-label online">Online</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator online"></span>
+                <span class="status-name">Kit</span>
+                <span class="status-label online">Online</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator offline"></span>
+                <span class="status-name">Ollama</span>
+                <span class="status-label offline">Offline</span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+    <p>Forge Mission Control v9 -- Built with OpenClaw -- Data embedded at deploy time</p>
+    <p>
+        <a href="/">Mission Control</a>
+        <span class="sep">|</span>
+        <a href="/review">Review Dashboard</a>
+    </p>
+    <p style="margin-top:8px;font-size:12px;">Last deployed: <span id="deploy-time"></span></p>
+</footer>
+
+<script>
+    // ---- 24-Session Schedule Data ----
+    // 4 Manager sessions (DeepSeek Reasoner): 6 AM, 12 PM, 6 PM, 12 AM
+    // 20 Worker sessions (DeepSeek Chat): every other hour on the odd hours + remaining even hours
+    var SCHEDULE = [
+        { hour: 0,  label: 'MGR',    type: 'manager' },
+        { hour: 1,  label: 'W-01',   type: 'worker' },
+        { hour: 2,  label: 'W-02',   type: 'worker' },
+        { hour: 3,  label: 'W-03',   type: 'worker' },
+        { hour: 4,  label: 'W-04',   type: 'worker' },
+        { hour: 5,  label: 'W-05',   type: 'worker' },
+        { hour: 6,  label: 'MGR',    type: 'manager' },
+        { hour: 7,  label: 'W-06',   type: 'worker' },
+        { hour: 8,  label: 'W-07',   type: 'worker' },
+        { hour: 9,  label: 'W-08',   type: 'worker' },
+        { hour: 10, label: 'W-09',   type: 'worker' },
+        { hour: 11, label: 'W-10',   type: 'worker' },
+        { hour: 12, label: 'MGR',    type: 'manager' },
+        { hour: 13, label: 'W-11',   type: 'worker' },
+        { hour: 14, label: 'W-12',   type: 'worker' },
+        { hour: 15, label: 'W-13',   type: 'worker' },
+        { hour: 16, label: 'W-14',   type: 'worker' },
+        { hour: 17, label: 'W-15',   type: 'worker' },
+        { hour: 18, label: 'MGR',    type: 'manager' },
+        { hour: 19, label: 'W-16',   type: 'worker' },
+        { hour: 20, label: 'W-17',   type: 'worker' },
+        { hour: 21, label: 'W-18',   type: 'worker' },
+        { hour: 22, label: 'W-19',   type: 'worker' },
+        { hour: 23, label: 'W-20',   type: 'worker' }
+    ];
+
+    function getEasternHour() {
+        var now = new Date();
+        var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+        return eastern.getHours();
+    }
+
+    function formatHour(h) {
+        if (h === 0) return '12 AM';
+        if (h === 12) return '12 PM';
+        if (h < 12) return h + ' AM';
+        return (h - 12) + ' PM';
+    }
+
+    function renderSchedule() {
+        var grid = document.getElementById('schedule-grid');
+        grid.innerHTML = '';
+        var currentHour = getEasternHour();
+
+        for (var i = 0; i < SCHEDULE.length; i++) {
+            var s = SCHEDULE[i];
+            var slot = document.createElement('div');
+            slot.className = 'schedule-slot';
+
+            if (s.type === 'manager') slot.className += ' manager';
+
+            // Determine state
+            if (s.hour < currentHour) {
+                slot.className += ' completed';
+            } else if (s.hour === currentHour) {
+                slot.className += ' current';
+            }
+            // else: upcoming (default)
+
+            slot.innerHTML =
+                '<span class="slot-time">' + formatHour(s.hour) + '</span>' +
+                '<span class="slot-label">' + s.label + '</span>';
+
+            grid.appendChild(slot);
+        }
+    }
+
+    // ---- Match Work History card height to Schedule card ----
+    function matchHistoryHeight() {
+        var scheduleCard = document.getElementById('schedule-grid');
+        if (!scheduleCard) return;
+        var scheduleParent = scheduleCard.closest('.card');
+        if (!scheduleParent) return;
+        var h = scheduleParent.offsetHeight;
+        var historyCard = document.getElementById('history-card');
+        if (historyCard && h > 0) {
+            historyCard.style.maxHeight = h + 'px';
+        }
+    }
+
+    // ---- Next Session Countdown (hourly schedule) ----
+    function getNextSession() {
+        var now = new Date();
+        var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+        var currentHour = eastern.getHours();
+        var currentMin = eastern.getMinutes();
+
+        // Find the next session (next hour boundary)
+        var nextHour = currentHour + 1;
+        if (nextHour >= 24) nextHour = 0;
+
+        // Find the matching schedule entry
+        var nextEntry = null;
+        for (var i = 0; i < SCHEDULE.length; i++) {
+            if (SCHEDULE[i].hour === nextHour) {
+                nextEntry = SCHEDULE[i];
+                break;
+            }
+        }
+
+        // Calculate time until next hour
+        var minsLeft = 59 - currentMin;
+        var secsLeft = 60 - eastern.getSeconds();
+        if (secsLeft === 60) { secsLeft = 0; } else { minsLeft--; if (minsLeft < 0) minsLeft = 0; }
+
+        var sessionName = nextEntry ? (nextEntry.type === 'manager' ? 'manager-' : 'worker-') + (nextHour < 10 ? '0' : '') + nextHour + '00' : 'session';
+
+        var parts = [];
+        if (minsLeft > 0) parts.push(minsLeft + 'm');
+        parts.push(secsLeft + 's');
+
+        return sessionName + ' in ' + parts.join(' ');
+    }
+
+    function updateCountdown() {
+        document.getElementById('next-session').textContent = getNextSession();
+    }
+
+    // ---- Live Clock ----
+    function updateClock() {
+        var now = new Date();
+        var opts = {
+            timeZone: 'America/New_York',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        var timeStr = now.toLocaleTimeString('en-US', opts);
+        document.getElementById('live-clock').textContent = timeStr + ' ET';
+    }
+
+    // ---- Deploy Time ----
+    function setDeployTime() {
+        var now = new Date();
+        var opts = {
+            timeZone: 'America/New_York',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        };
+        document.getElementById('deploy-time').textContent = now.toLocaleString('en-US', opts) + ' ET';
+    }
+
+    // ---- Initialize ----
+    renderSchedule();
+    updateClock();
+    updateCountdown();
+    setDeployTime();
+    // Match heights after render
+    setTimeout(matchHistoryHeight, 50);
+    window.addEventListener('resize', matchHistoryHeight);
+
+    setInterval(updateClock, 1000);
+    setInterval(updateCountdown, 1000);
+    // Re-render schedule every minute to update current slot
+    setInterval(renderSchedule, 60000);
+</script>
+
+</body>
+</html>

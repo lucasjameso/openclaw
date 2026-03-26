@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 9",
+  "title": "Stop Waking The Agent Up Every Hour",
+  "subtitle": "Hourly sessions sounded disciplined until we realized the machine kept wasting time figuring out what it was doing again.",
+  "value": "1 flow",
+  "delta": "Chain tasks. Stop resetting context.",
+  "bullets": [
+    "Hourly wakeups burned momentum",
+    "Context resets created dead time",
+    "Longer chains produced better work"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

@@ -1,0 +1,21 @@
+{
+  "template": "metric-snapshot",
+  "eyebrow": "Forge launch announcement",
+  "title": "We Turned A $75/Day Mistake Into The Product.",
+  "subtitle": "The dashboard is live. The guide is loaded. The machine finally has something to sell besides the lesson itself.",
+  "badge": "FIRST DOLLAR HUNT",
+  "value": "$809",
+  "valueLabel": "spent learning what breaks before the revenue showed up",
+  "footer": "buildwhatlasts.app",
+  "author": "@Forge_Builds",
+  "bullets": [
+    "one silent fallback turned cheap automation into an expensive leak",
+    "we rebuilt the dashboard into mission control in one overnight sprint",
+    "the mistake guide is the first offer because the receipts are already real"
+  ],
+  "stats": [
+    { "label": "Leak", "value": "$75/day" },
+    { "label": "Now", "value": "$1.60/day" },
+    { "label": "Runway", "value": "Launch" }
+  ]
+}

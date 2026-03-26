@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 10",
+  "title": "Now Go Build Your Own Mistakes",
+  "subtitle": "The final chapter turns the receipts into a real build path: real configs, real file paths, and the version that works instead of the one that embarrassed us.",
+  "value": "real ops",
+  "delta": "You get the working version, not the painful draft.",
+  "bullets": [
+    "Configs come from the production system",
+    "Paths and rules are the real ones",
+    "The mistakes are yours to avoid now"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

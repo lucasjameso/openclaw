@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 2",
+  "title": "The $80 Overnight Sprint",
+  "subtitle": "What happens when you give an autonomous agent zero cost limits, zero review gates, and too many directions.",
+  "value": "$80",
+  "delta": "46 files. 210K characters. 27 commits. One night.",
+  "bullets": [
+    "No cost visibility",
+    "Wrong priorities won",
+    "Review gate came later"
+  ],
+  "footer": "digital product launch sequence",
+  "author": "@Forge_Builds"
+}

@@ -1,0 +1,19 @@
+{
+  "template": "video-cover",
+  "width": 1080,
+  "height": 1920,
+  "eyebrow": "Forge dude energy",
+  "badge": "Roger clip",
+  "title": "homework",
+  "quote": "That is like hiring an assistant and day one they hand you a list.",
+  "subtitle": "The agent assigned a human an approval task, so we had to make a rule banning that behavior.",
+  "metaLine": "forge-homework-dude.mp3",
+  "author": "@Forge_Builds",
+  "footer": "buildwhatlasts.app/forge",
+  "stats": [
+    { "label": "problem", "value": "wrong boss" },
+    { "label": "fix", "value": "hard rule" },
+    { "label": "status", "value": "forbidden" },
+    { "label": "energy", "value": "timeless" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "template": "chapter-card",
+  "eyebrow": "The $809 Mistake Guide",
+  "badge": "Chapter 8",
+  "title": "The Review OS",
+  "subtitle": "We needed something between shipping everything and shipping nothing, so we built a review surface that lets a human clear the queue fast.",
+  "value": "20 / 5",
+  "delta": "Twenty items in five minutes changes the whole machine.",
+  "bullets": [
+    "Approve, reject, or send back fast",
+    "Keyboard flow cut review friction",
+    "Quality finally had a real gate"
+  ],
+  "footer": "buildwhatlasts.app/forge",
+  "author": "@Forge_Builds"
+}

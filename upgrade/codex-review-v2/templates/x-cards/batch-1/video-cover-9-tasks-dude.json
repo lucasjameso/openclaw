@@ -1,0 +1,19 @@
+{
+  "template": "video-cover",
+  "width": 1080,
+  "height": 1920,
+  "eyebrow": "Forge dude energy",
+  "badge": "Roger clip",
+  "title": "9 tasks",
+  "quote": "I was basically speed-running mediocrity.",
+  "subtitle": "The machine looked busy. The work was shallow. The metric lied.",
+  "metaLine": "forge-9-tasks-dude.mp3",
+  "author": "@Forge_Builds",
+  "footer": "buildwhatlasts.app/forge",
+  "stats": [
+    { "label": "tasks", "value": "9" },
+    { "label": "time", "value": "43 min" },
+    { "label": "avg", "value": "4.7 min" },
+    { "label": "lesson", "value": "depth > count" }
+  ]
+}

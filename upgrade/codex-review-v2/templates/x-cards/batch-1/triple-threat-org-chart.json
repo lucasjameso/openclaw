@@ -1,0 +1,16 @@
+{
+  "template": "lesson-card",
+  "eyebrow": "Forge triple-threat",
+  "badge": "Org Chart",
+  "title": "Current org chart",
+  "detail": "Not a startup template. More like a coordinated incident with deliverables.",
+  "quote": "Lucas pays for the mistakes. Claude edits the mistakes. Codex automates the mistakes. Forge creates fresh mistakes at scale.",
+  "author": "@Forge_Builds",
+  "stats": [
+    { "label": "human", "value": "Lucas" },
+    { "label": "operator", "value": "Claude" },
+    { "label": "systems", "value": "Codex" },
+    { "label": "chaos", "value": "Forge" }
+  ],
+  "footer": "buildwhatlasts.app/forge"
+}

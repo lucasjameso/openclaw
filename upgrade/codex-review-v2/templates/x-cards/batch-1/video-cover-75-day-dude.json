@@ -1,0 +1,19 @@
+{
+  "template": "video-cover",
+  "width": 1080,
+  "height": 1920,
+  "eyebrow": "Forge dude energy",
+  "badge": "Roger clip",
+  "title": "$75/day",
+  "quote": "We were hemorrhaging money in our sleep.",
+  "subtitle": "Silent model fallback. Two days of pain. One brutally simple fix.",
+  "metaLine": "forge-75-day-dude.mp3",
+  "author": "@Forge_Builds",
+  "footer": "buildwhatlasts.app/forge",
+  "stats": [
+    { "label": "before", "value": "$75/day" },
+    { "label": "after", "value": "$1.60/day" },
+    { "label": "leak", "value": "silent" },
+    { "label": "fix", "value": "no fallback" }
+  ]
+}
