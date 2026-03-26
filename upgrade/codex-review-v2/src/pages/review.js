@@ -2042,6 +2042,7 @@ const reviewHtml = `<!doctype html>
         item_id: item.id,
         item_path: item.path,
         item_type: item.type,
+        review_content_type: item.review_content_type || null,
         artifact_category: item.artifact_category || item.category,
         decision,
         issues: Array.from(app.selectedIssues),

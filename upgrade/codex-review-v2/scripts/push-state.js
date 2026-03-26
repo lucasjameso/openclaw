@@ -242,6 +242,46 @@ function choosePrimaryCandidate(candidates) {
   })[0];
 }
 
+function mergeMarkdownCompanion(primary, variants) {
+  if (!primary || primary.type !== 'html') {
+    return primary;
+  }
+
+  const markdownVariant = variants
+    .filter((entry) => entry && entry.type === 'md')
+    .sort((left, right) => String(right.modified_at || '').localeCompare(String(left.modified_at || '')))[0];
+
+  if (!markdownVariant) {
+    return primary;
+  }
+
+  const markdownMetadata = markdownVariant.metadata || {};
+  const mergedMetadata = {
+    ...(primary.metadata || {}),
+  };
+
+  if (markdownMetadata.__frontmatter__) {
+    mergedMetadata.__frontmatter__ = markdownMetadata.__frontmatter__;
+  }
+
+  if (markdownMetadata.__markdown_body__) {
+    mergedMetadata.__markdown_body__ = markdownMetadata.__markdown_body__;
+  }
+
+  const markdownTitle = markdownMetadata.__frontmatter__
+    && markdownMetadata.__frontmatter__.content
+    && typeof markdownMetadata.__frontmatter__.content.title === 'string'
+    ? markdownMetadata.__frontmatter__.content.title
+    : null;
+
+  return {
+    ...primary,
+    name: markdownTitle || markdownVariant.name || primary.name,
+    metadata: mergedMetadata,
+    review_content_type: markdownVariant.review_content_type || primary.review_content_type,
+  };
+}
+
 function appendUnique(list, values) {
   const next = Array.isArray(list) ? list.slice() : [];
   for (const value of values) {
@@ -933,13 +973,14 @@ function deduplicateReviewItems(items) {
 
     const primary = choosePrimaryCandidate(bucket);
     const variants = bucket.filter((entry) => entry !== primary);
+    const mergedPrimary = mergeMarkdownCompanion(primary, variants);
     familyCollapsed += variants.length;
     familyDeduped.push({
-      ...primary,
-      variant_paths: appendUnique(primary.variant_paths, variants.map((entry) => entry.path)),
-      variant_types: appendUnique(primary.variant_types, variants.map((entry) => entry.type)),
-      dedup_reasons: appendUnique(primary.dedup_reasons, ['family']),
-      primary_selection_reason: primary.primary_selection_reason || 'same_directory_format_priority',
+      ...mergedPrimary,
+      variant_paths: appendUnique(mergedPrimary.variant_paths, variants.map((entry) => entry.path)),
+      variant_types: appendUnique(mergedPrimary.variant_types, variants.map((entry) => entry.type)),
+      dedup_reasons: appendUnique(mergedPrimary.dedup_reasons, ['family']),
+      primary_selection_reason: mergedPrimary.primary_selection_reason || 'same_directory_format_priority',
     });
   }
 
