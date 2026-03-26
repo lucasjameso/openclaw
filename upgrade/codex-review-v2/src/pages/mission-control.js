@@ -586,7 +586,7 @@ const missionControlHtml = `<!doctype html>
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.05fr) minmax(300px, 0.9fr);
+      grid-template-columns: minmax(300px, 0.95fr) minmax(380px, 1.15fr) minmax(280px, 0.9fr);
       gap: 18px;
       align-items: start;
     }
@@ -1089,7 +1089,6 @@ const missionControlHtml = `<!doctype html>
 
     @media (max-width: 1240px) {
       .hero,
-      .main-grid,
       .footer-row,
       .glance-row {
         grid-template-columns: 1fr;
@@ -1104,9 +1103,27 @@ const missionControlHtml = `<!doctype html>
       }
     }
 
+    @media (max-width: 1080px) {
+      .main-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .main-grid > .stack:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+    }
+
     @media (max-width: 820px) {
       .app-shell {
         padding: 16px 16px 30px;
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .main-grid > .stack:nth-child(3) {
+        grid-column: auto;
       }
 
       .hero,
