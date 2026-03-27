@@ -1123,6 +1123,64 @@ function deriveArtifactDimensions(extension, buffer) {
   return null;
 }
 
+/**
+ * loadLocalApprovals -- read durable approval records written by forge_ops approval engine.
+ * Returns a Map keyed by item_id (which may be a path-derived slug) -> { decision, comment, reviewer, reviewed_at }.
+ * Called before mergeExistingReviewState so local CLI decisions flow into KV state on next push.
+ */
+function loadLocalApprovals() {
+  const approvalsDir = path.join(WORKSPACE, 'approvals');
+  const map = new Map();
+  try {
+    if (!fs.existsSync(approvalsDir)) return map;
+    for (const fname of fs.readdirSync(approvalsDir)) {
+      if (!fname.endsWith('.json')) continue;
+      try {
+        const rec = JSON.parse(fs.readFileSync(path.join(approvalsDir, fname), 'utf8'));
+        if (rec.item_id && rec.decision) {
+          map.set(rec.item_id, rec);
+        }
+      } catch (_) { /* skip malformed */ }
+    }
+  } catch (_) { /* no approvals dir -- ok */ }
+  return map;
+}
+
+/**
+ * overlayLocalApprovals -- inject local approval decisions into existingState before merge.
+ * Matches by item_id (slug derived from filename) or by task_id.
+ */
+function overlayLocalApprovals(existingState, localApprovals) {
+  if (!localApprovals.size) return existingState;
+  const items = Array.isArray(existingState?.reviews?.items) ? existingState.reviews.items : [];
+  // Build secondary path-stem lookup for fuzzy matching
+  // (scan IDs use mangled path format; approval IDs use slug format)
+  const byPathStem = new Map();
+  for (const [id, rec] of localApprovals) {
+    if (rec.artifact_path) {
+      const stem = path.basename(rec.artifact_path, path.extname(rec.artifact_path));
+      byPathStem.set(stem, rec);
+      byPathStem.set(rec.artifact_path.replace(/\\/g, '/'), rec);
+    }
+  }
+  const merged = items.map((item) => {
+    const itemStem = path.basename(item.path || '', path.extname(item.path || ''));
+    const local = localApprovals.get(item.id)
+      || localApprovals.get(item.task_id)
+      || byPathStem.get(itemStem)
+      || byPathStem.get((item.path || '').replace(/\\/g, '/'));
+    if (!local || item.current_decision) return item; // don't overwrite existing KV decision
+    return {
+      ...item,
+      current_decision: local.decision,
+      review_comment: local.comment || '',
+      reviewer: local.reviewer || 'lucas',
+      reviewed_at: local.reviewed_at || null,
+    };
+  });
+  return { ...existingState, reviews: { ...existingState?.reviews, items: merged } };
+}
+
 function mergeExistingReviewState(items, existingState) {
   const existingItems = Array.isArray(existingState?.reviews?.items) ? existingState.reviews.items : [];
   const byPath = new Map(existingItems.map((item) => [item.path, item]));
@@ -1467,7 +1525,13 @@ async function buildState() {
   const existingState = await readExistingState();
   // Review artifacts should already be rendered and validated by review-pipeline.js.
   const reviewScan = scanReviewDirectory(PATHS.reviewDir);
-  const reviewState = await buildReviewState(reviewScan, existingState && !existingState.status ? existingState : null);
+  // Overlay local forge_ops approval records so CLI decisions flow into KV on push
+  const localApprovals = loadLocalApprovals();
+  const mergedExistingState = overlayLocalApprovals(
+    existingState && !existingState.status ? existingState : null,
+    localApprovals
+  );
+  const reviewState = await buildReviewState(reviewScan, mergedExistingState);
   const queue = buildQueueState(queueJson);
   const sessions = buildSessionsState(sessionJson);
   const schedule = getCronSchedule();

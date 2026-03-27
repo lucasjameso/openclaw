@@ -1,6 +1,7 @@
 import missionControlHtml from './pages/mission-control.js';
 import launchpadHtml from './pages/launchpad.js';
 import reviewHtml from './pages/review.js';
+import reviewInboxHtml from './pages/review-inbox.js';
 import storyMobileHtml from './pages/story-mobile.js';
 import xPostsHtml from './pages/x-posts.js';
 import storyHtml from './pages/story.js';
@@ -209,6 +210,10 @@ export default {
 
     if (request.method === 'GET' && pathname === '/review') {
       return htmlResponse(reviewHtml);
+    }
+
+    if (request.method === 'GET' && pathname === '/review-inbox') {
+      return htmlResponse(reviewInboxHtml);
     }
 
     if (request.method === 'GET' && pathname === '/story-mobile') {

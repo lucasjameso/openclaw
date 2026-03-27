@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# forge -- project-root entry point for forge_ops CLI
+#
+# Usage (from anywhere inside the project):
+#   /Users/lucas/Forge/openclaw/forge queue status
+#   /Users/lucas/Forge/openclaw/forge review pending
+#   /Users/lucas/Forge/openclaw/forge approval apply --item foo --decision approve
+#   /Users/lucas/Forge/openclaw/forge scorecard daily
+#   /Users/lucas/Forge/openclaw/forge mobile-review next
+#
+# Or add the project root to PATH and just call: forge queue status
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLS_DIR="$SCRIPT_DIR/tools"
+WORKSPACE_DIR="$SCRIPT_DIR/data/workspace"
+
+# Set workspace path if not already set
+export FORGE_WORKSPACE_DIR="${FORGE_WORKSPACE_DIR:-$WORKSPACE_DIR}"
+
+exec python3 -c "
+import sys
+sys.path.insert(0, '$TOOLS_DIR')
+from forge_ops.__main__ import main
+main()
+" "$@"
