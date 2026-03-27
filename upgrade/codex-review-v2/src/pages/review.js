@@ -1331,9 +1331,36 @@ ${renderTopbar({
             <div id="issue-tags" class="tag-grid"></div>
           </div>
 
+          <div class="stack" id="reason-tags-section" style="display:none">
+            <div class="section-heading">Why? <span style="font-weight:400;color:var(--text-tertiary)">(taxonomy)</span></div>
+            <div id="reason-tags" class="tag-grid"></div>
+          </div>
+
+          <div class="stack" id="strength-tags-section" style="display:none">
+            <div class="section-heading">Strengths <span style="font-weight:400;color:var(--text-tertiary)">(what works)</span></div>
+            <div id="strength-tags" class="tag-grid"></div>
+          </div>
+
           <div class="stack">
             <div class="section-heading">Reviewer Notes</div>
             <textarea id="comment-box" class="comment-box" placeholder="Add notes for Forge..."></textarea>
+          </div>
+
+          <div class="stack" style="display:grid;grid-template-columns:1fr auto;gap:var(--space-2);align-items:end">
+            <div>
+              <div class="section-heading">Improvement Note</div>
+              <input id="improvement-note" class="search-input" placeholder="Single most important fix..." style="min-height:38px">
+            </div>
+            <div>
+              <div class="section-heading">Action</div>
+              <select id="template-action" style="min-height:38px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-control);color:var(--text-primary);padding:0 8px;font:inherit;font-size:12px">
+                <option value="none">None</option>
+                <option value="update_template">Update template</option>
+                <option value="create_example">Create example</option>
+                <option value="add_guardrail">Add guardrail</option>
+                <option value="update_skill">Update skill</option>
+              </select>
+            </div>
           </div>
 
           <div class="stack">
@@ -1382,6 +1409,10 @@ ${renderTopbar({
       approve: [],
     };
 
+    // Revision Intelligence Layer -- taxonomy tags from patterns/review-reason-taxonomy.md
+    const REASON_TAGS = ['hook_weak', 'too_generic', 'voice_mismatch', 'proof_weak', 'cta_unclear', 'platform_mismatch', 'timing_mismatch', 'launch_language_wrong', 'repetitive_angle', 'visual_hierarchy_weak', 'visual_clutter', 'not_shippable', 'needs_tighter_edit', 'offer_unclear', 'audience_unclear', 'brand_outdated'];
+    const STRENGTH_TAGS = ['strong_hook', 'specific_proof', 'voice_locked', 'clean_hierarchy', 'tight_edit', 'clear_cta', 'platform_native', 'original_angle', 'emotional_punch'];
+
     const DECISION_META = {
       approve: {
         label: 'Approve',
@@ -1411,6 +1442,8 @@ ${renderTopbar({
       selectedItemId: null,
       selectedDecision: 'needs_revision',
       selectedIssues: new Set(),
+      selectedReasonTags: new Set(),
+      selectedStrengthTags: new Set(),
       historyByItem: new Map(),
       analytics: null,
       filter: 'all',
@@ -2075,6 +2108,7 @@ ${renderTopbar({
       }
 
       renderIssueTags();
+      renderTaxonomyTags();
       renderSubmitButton();
       syncWorkspaceHeight();
     }
@@ -2088,6 +2122,26 @@ ${renderTopbar({
       }
 
       root.innerHTML = tags.map((tag) => '<button class="tag-pill ' + (app.selectedIssues.has(tag) ? 'selected' : '') + '" data-tag="' + escapeHtml(tag) + '">' + escapeHtml(tag.replace(/_/g, ' ')) + '</button>').join('');
+    }
+
+    function renderTaxonomyTags() {
+      const reasonSection = document.getElementById('reason-tags-section');
+      const strengthSection = document.getElementById('strength-tags-section');
+      if (app.selectedDecision === 'approve') {
+        reasonSection.style.display = 'none';
+        strengthSection.style.display = '';
+        document.getElementById('strength-tags').innerHTML = STRENGTH_TAGS.map((tag) =>
+          '<button class="tag-pill ' + (app.selectedStrengthTags.has(tag) ? 'selected' : '') +
+          '" data-strength-tag="' + escapeHtml(tag) + '">' + escapeHtml(tag.replace(/_/g, ' ')) + '</button>'
+        ).join('');
+      } else {
+        reasonSection.style.display = '';
+        strengthSection.style.display = 'none';
+        document.getElementById('reason-tags').innerHTML = REASON_TAGS.map((tag) =>
+          '<button class="tag-pill ' + (app.selectedReasonTags.has(tag) ? 'selected' : '') +
+          '" data-reason-tag="' + escapeHtml(tag) + '">' + escapeHtml(tag.replace(/_/g, ' ')) + '</button>'
+        ).join('');
+      }
     }
 
     function renderSubmitButton() {
@@ -2113,8 +2167,11 @@ ${renderTopbar({
     function setSelectedDecision(decision) {
       app.selectedDecision = decision;
       app.selectedIssues = new Set();
+      app.selectedReasonTags = new Set();
+      app.selectedStrengthTags = new Set();
       renderDecisionTabs();
       renderIssueTags();
+      renderTaxonomyTags();
     }
 
     function renderStats() {
@@ -2196,17 +2253,32 @@ ${renderTopbar({
     }
 
     async function fetchState() {
-      const response = await liveFetch('/api/state');
-      if (!response.ok) throw new Error('Unable to load review state');
-      const payload = await response.json();
+      // Load state and review items in parallel.
+      // Review items come from /api/reviews (lightweight active-queue endpoint)
+      // rather than from the full /api/state blob, which can contain inline
+      // base64 image data for hundreds of historical files and crash the tab.
+      const [stateResponse, reviewsResponse] = await Promise.all([
+        liveFetch('/api/state'),
+        liveFetch('/api/reviews'),
+      ]);
+      if (!stateResponse.ok) throw new Error('Unable to load review state');
+      const payload = await stateResponse.json();
       if (payload && payload.status === 'no data yet') {
         app.state = { lastUpdated: null };
         app.items = [];
         app.metadata = {};
       } else {
         app.state = payload;
-        app.items = Array.isArray(payload.reviews && payload.reviews.items) ? payload.reviews.items : [];
-        app.metadata = payload.reviews && payload.reviews.metadata ? payload.reviews.metadata : {};
+        // Prefer items from the dedicated reviews endpoint; fall back to state
+        // only if the reviews fetch fails (e.g. Worker not yet deployed).
+        if (reviewsResponse.ok) {
+          const reviewsPayload = await reviewsResponse.json();
+          app.items = Array.isArray(reviewsPayload.items) ? reviewsPayload.items : [];
+          app.metadata = reviewsPayload.metadata || {};
+        } else {
+          app.items = Array.isArray(payload.reviews && payload.reviews.items) ? payload.reviews.items : [];
+          app.metadata = payload.reviews && payload.reviews.metadata ? payload.reviews.metadata : {};
+        }
       }
       renderStats();
       renderQueue();
@@ -2216,11 +2288,23 @@ ${renderTopbar({
     }
 
     async function fetchAnalytics() {
-      const response = await liveFetch('/api/analytics/summary');
-      if (!response.ok) throw new Error('Unable to load analytics');
-      const payload = await response.json();
-      app.analytics = payload.analytics || null;
-      renderAnalytics();
+      // Never throws -- analytics failure is non-blocking. If the endpoint is
+      // down or returns an error, the strip renders "Analytics unavailable"
+      // and review decisions continue to work normally.
+      try {
+        const response = await liveFetch('/api/analytics/summary');
+        if (!response.ok) {
+          app.analytics = null;
+          renderAnalytics();
+          return;
+        }
+        const payload = await response.json();
+        app.analytics = payload.analytics || null;
+        renderAnalytics();
+      } catch (_) {
+        app.analytics = null;
+        renderAnalytics();
+      }
     }
 
     async function fetchHistory(itemId) {
@@ -2235,7 +2319,10 @@ ${renderTopbar({
     }
 
     async function refreshLiveData() {
-      await Promise.all([fetchState(), fetchAnalytics()]);
+      // fetchAnalytics is separated from fetchState so a failing analytics
+      // endpoint cannot block or error-out the state refresh.
+      await fetchState();
+      fetchAnalytics(); // intentionally not awaited at the top level
       if (app.selectedItemId) {
         await fetchHistory(app.selectedItemId);
       }
@@ -2262,6 +2349,8 @@ ${renderTopbar({
       app.selectedItemId = itemId;
       app.selectedAt = performance.now();
       app.selectedIssues = new Set();
+      app.selectedReasonTags = new Set();
+      app.selectedStrengthTags = new Set();
       app.selectedDecision = item && item.current_decision ? item.current_decision : 'needs_revision';
       renderQueue();
       renderPreview();
@@ -2307,7 +2396,11 @@ ${renderTopbar({
         artifact_category: item.artifact_category || item.category,
         decision,
         issues: Array.from(app.selectedIssues),
+        reason_tags: Array.from(app.selectedReasonTags),
+        strength_tags: Array.from(app.selectedStrengthTags),
         comment: document.getElementById('comment-box').value.trim(),
+        improvement_note: (document.getElementById('improvement-note').value || '').trim(),
+        template_action: document.getElementById('template-action').value || 'none',
         reviewer: 'lucas',
         time_to_decision_seconds: Math.max(1, Math.round((performance.now() - app.selectedAt) / 1000)),
         artifact_size_bytes: item.artifact_size_bytes || 0,
@@ -2341,10 +2434,13 @@ ${renderTopbar({
         }
         const nextId = nextQueueItemId(item.id);
         document.getElementById('comment-box').value = '';
+        document.getElementById('improvement-note').value = '';
+        document.getElementById('template-action').value = 'none';
         app.selectedIssues = new Set();
+        app.selectedReasonTags = new Set();
+        app.selectedStrengthTags = new Set();
         renderStats();
         await fetchHistory(item.id);
-        await fetchAnalytics();
         flashSyncStatus(decision === 'approve' ? 'Approved' : (decision === 'reject' ? 'Rejected' : 'Marked for revision'));
         flashPreview(decision);
 
@@ -2356,8 +2452,18 @@ ${renderTopbar({
           renderPreview();
           renderInspector();
         }
+
+        // Refresh analytics after the decision is saved and the queue has
+        // advanced. Runs after the try block so an analytics failure cannot
+        // interrupt the decision flow or trigger the error handler below.
+        fetchAnalytics();
       } catch (error) {
-        window.alert(error.message);
+        // Only real save failures reach here. Show a non-alert inline error.
+        const syncEl = document.getElementById('topbar-sync-chip');
+        if (syncEl) {
+          syncEl.innerHTML = '<strong style="color:var(--error)">Save failed: ' + error.message.replace(/</g, '&lt;') + '</strong>';
+          window.setTimeout(() => updateSyncStatus(), 5000);
+        }
       } finally {
         app.submitting = false;
         renderSubmitButton();
@@ -2457,6 +2563,24 @@ ${renderTopbar({
           app.selectedIssues.add(tag);
         }
         renderIssueTags();
+      });
+
+      document.getElementById('reason-tags').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-reason-tag]');
+        if (!button) return;
+        const tag = button.dataset.reasonTag;
+        if (app.selectedReasonTags.has(tag)) { app.selectedReasonTags.delete(tag); }
+        else { app.selectedReasonTags.add(tag); }
+        renderTaxonomyTags();
+      });
+
+      document.getElementById('strength-tags').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-strength-tag]');
+        if (!button) return;
+        const tag = button.dataset.strengthTag;
+        if (app.selectedStrengthTags.has(tag)) { app.selectedStrengthTags.delete(tag); }
+        else { app.selectedStrengthTags.add(tag); }
+        renderTaxonomyTags();
       });
 
       document.getElementById('submit-button').addEventListener('click', (event) => submitDecision(app.selectedDecision, event.currentTarget));

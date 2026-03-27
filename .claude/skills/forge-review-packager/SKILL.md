@@ -113,10 +113,54 @@ Options:
 5. Optionally notify #forge Slack channel that a review item is ready
 6. Do not mark the task as "published" or "deployed" -- that requires explicit approval
 
+## Pre-Review Quality Gate
+
+Before packaging, run these checks in order. Do NOT package artifacts that fail.
+
+### A. Dedup Check (prevents reappearance of already-reviewed content)
+
+Before placing any artifact in the review folder:
+1. Check if the same FILENAME already exists anywhere under `data/workspace/review/`
+   ```bash
+   find /Users/lucas/Forge/openclaw/data/workspace/review -name "$(basename ARTIFACT_PATH)" 2>/dev/null
+   ```
+2. If a match exists, check its review status. Do NOT create a new copy if the existing version is already approved or rejected.
+3. If the artifact is a new VERSION of an existing reviewed item (e.g., a redesigned x-card), place it at the SAME path as the original so push-state merges the decision correctly. Do not create a new batch directory.
+
+### B. Dimension Verification (for visual assets)
+
+For any `.png`, `.jpg`, `.jpeg`, `.webp` image:
+```bash
+magick identify ARTIFACT_PATH | awk '{print $3}'
+```
+
+Expected dimensions by type:
+- LinkedIn/X cards: 1080x1350
+- Social preview / OG images: 1200x630
+- Other: verify against the intended target spec
+
+If dimensions are wrong, fix the asset BEFORE packaging. This is the #1 cause of revision churn (14 comments, 37 dimension tags in the review history).
+
+### C. Brand and Content Check
+
+1. Read `data/workspace/patterns/brand-constraints-inline.md` -- verify the asset matches current direction (darker/cleaner aesthetic preferred)
+2. Verify required elements:
+   - Brand footer ("Build What Lasts") present
+   - Book title present if referencing CLARITY
+   - Phase-correct launch dates and CTA language
+   - No empty social proof ("Join 0+ leaders")
+3. If the artifact is a visual, run through `data/workspace/playbooks/visual-review-playbook.md` checklist
+4. If the artifact is launch content, run through `data/workspace/playbooks/launch-content-quality-playbook.md`
+
+### D. Failure Pattern Check
+
+Check `data/workspace/patterns/failure-patterns.md` -- does this artifact type have a known failure pattern? If yes, verify the fix strategy has been applied.
+
 ---
 
 ## Batch Packaging
 
 If multiple artifacts need review from the same session:
 1. Package each one individually with its own metadata file
-2. Update `data/workspace/review/PENDING.md` with all new items
+2. Run the dedup check (A) for EACH artifact -- do not batch-skip
+3. Update `data/workspace/review/PENDING.md` with all new items

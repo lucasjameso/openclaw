@@ -245,7 +245,15 @@ export default {
         });
       }
 
-      return jsonResponse(ensureStateShape(state));
+      // Strip reviews.items and reviews.metadata from the state response.
+      // Both are large; items are served via /api/reviews and metadata is
+      // only needed when a specific item is selected. Only stats are needed
+      // in the main state payload for the dashboard stats strip.
+      const shaped = ensureStateShape(state);
+      if (shaped.reviews) {
+        shaped.reviews = { stats: shaped.reviews.stats };
+      }
+      return jsonResponse(shaped);
     }
 
     if (pathname === '/api/state' && request.method === 'POST') {

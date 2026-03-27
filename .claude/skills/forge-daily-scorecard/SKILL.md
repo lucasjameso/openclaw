@@ -47,6 +47,8 @@ Pull from these files:
 - `data/workspace/offers/` -- active offer definitions
 - `data/workspace/scorecards/scorecard-YYYY-MM-DD.md` -- today's session entries
 - `data/workspace/review/` -- artifacts awaiting review
+- `data/workspace/reports/review-intelligence-latest.json` -- approval rate, top issue tags, revision patterns
+- `data/workspace/patterns/failure-patterns.md` -- recurring revision causes
 - Session logs if available
 
 ---
@@ -78,6 +80,8 @@ data/workspace/scorecards/daily-YYYY-MM-DD.md
 |--------|-------|
 | Review items produced | <count> |
 | Review items pending | <count> |
+| Approval rate (rolling) | <% from reports/review-intelligence-latest.json if available> |
+| Top revision reason | <most frequent reason_tag this period, or top issue tag> |
 | Lessons captured | <count> |
 | Shallow/duplicate outputs flagged | <count> |
 

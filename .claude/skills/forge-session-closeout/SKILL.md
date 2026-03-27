@@ -88,6 +88,51 @@ If during this session you discovered work that should happen next:
 
 ---
 
+### 6. Regenerate Review Intelligence Report
+
+If any review decisions were made this session, regenerate the intelligence report:
+```bash
+curl -s "https://forge-dashboard.lucasjamesoliver1.workers.dev/api/review-events?limit=200" | \
+python3 -c "
+import json, sys, collections
+events = json.loads(sys.stdin.read()).get('events', [])
+decs = collections.Counter(e.get('decision') for e in events)
+total = len(events)
+issue_events = [e for e in events if e.get('decision') in ('needs_revision', 'reject')]
+all_issues = [t for e in issue_events for t in (e.get('issues') or [])]
+reason_tags = [t for e in issue_events for t in (e.get('reason_tags') or [])]
+strength_tags = [t for e in events if e.get('decision')=='approve' for t in (e.get('strength_tags') or [])]
+report = {
+  'generated_at': __import__('datetime').datetime.utcnow().isoformat()+'Z',
+  'event_count': total,
+  'approval_rate_pct': round(decs.get('approve',0)/total*100,1) if total else 0,
+  'revision_rate_pct': round(decs.get('needs_revision',0)/total*100,1) if total else 0,
+  'decisions': dict(decs),
+  'top_issue_tags': dict(collections.Counter(all_issues).most_common(10)),
+  'top_reason_tags': dict(collections.Counter(reason_tags).most_common(10)),
+  'top_strength_tags': dict(collections.Counter(strength_tags).most_common(10)),
+}
+print(json.dumps(report, indent=2))
+" > /Users/lucas/Forge/openclaw/data/workspace/reports/review-intelligence-latest.json
+```
+
+This overwrites the JSON report. The markdown report should be updated manually when patterns shift meaningfully, not on every closeout.
+
+### 7. Review Intelligence Check
+
+If this session produced artifacts that went through review (approved, revised, or rejected):
+
+1. Check if any revision used the same `reason_tag` 3+ times this week
+   - If yes, check `data/workspace/patterns/failure-patterns.md` -- is this pattern already recorded?
+   - If not recorded, add a new entry
+   - If recorded, increment the count and check if escalation is warranted
+2. Check if an approved artifact used a notably effective approach
+   - If yes, check `data/workspace/patterns/approved-patterns.md` -- add or update
+3. If `template_action` on any review event is not `none`, record it in `data/workspace/patterns/template-update-log.md`
+4. Reference `data/workspace/playbooks/revision-response-playbook.md` when handling any revision response
+
+---
+
 ## Minimum Viable Closeout
 
 If the session was short or exploratory, minimum acceptable closeout:

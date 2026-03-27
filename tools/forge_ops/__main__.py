@@ -31,6 +31,8 @@ Examples:
   python3 -m forge_ops scorecard weekly
   python3 -m forge_ops mobile-review export --json
   python3 -m forge_ops mobile-review next
+  python3 -m forge_ops content-dispatch mark-published --id W1-D1
+  python3 -m forge_ops content-dispatch mark-published --id W1-D1 --url https://linkedin.com/...
 """
 import argparse
 import json
@@ -329,6 +331,145 @@ def cmd_scorecard(args: list[str]) -> None:
 
 # ── Mobile review ─────────────────────────────────────────────────────────────
 
+# ── Review Intelligence ───────────────────────────────────────────────────────
+
+def cmd_review_intel(args: list[str]) -> None:
+    from forge_ops import review_intelligence_engine
+    p = argparse.ArgumentParser(prog="forge_ops review-intel")
+    p.add_argument("command", choices=["refresh", "report"])
+    p.add_argument("--json", action="store_true")
+    ns = p.parse_args(args)
+
+    try:
+        if ns.command == "refresh":
+            result = review_intelligence_engine.refresh()
+            if not ns.json:
+                print(f"  Status: {result['status']}")
+                print(f"  Events: {result.get('event_count', 0)}")
+                print(f"  Approval rate: {result.get('approval_rate_pct', '?')}%")
+                print(f"  Needs revision: {result.get('needs_revision_count', 0)}")
+                for label, path in result.get("files", {}).items():
+                    print(f"  {label}: {path}")
+            else:
+                _out(result, True)
+
+        elif ns.command == "report":
+            result = review_intelligence_engine.report()
+            _out(result, ns.json)
+
+    except Exception as e:
+        _err(str(e))
+
+
+# ── Repair Queue ─────────────────────────────────────────────────────────────
+
+def cmd_repair_queue(args: list[str]) -> None:
+    from forge_ops import repair_queue_engine
+    p = argparse.ArgumentParser(prog="forge_ops repair-queue")
+    p.add_argument("command", choices=["build", "list"])
+    p.add_argument("--json", action="store_true")
+    ns = p.parse_args(args)
+
+    try:
+        if ns.command == "build":
+            result = repair_queue_engine.build()
+            if not ns.json:
+                print(f"  Status: {result['status']}")
+                print(f"  Items in repair queue: {result['total_items']}")
+                print(f"  Clusters:")
+                for cluster, count in result["cluster_counts"].items():
+                    print(f"    {cluster}: {count}")
+                for label, path in result.get("files", {}).items():
+                    print(f"  {label}: {path}")
+            else:
+                _out(result, True)
+
+        elif ns.command == "list":
+            result = repair_queue_engine.list_queue()
+            _out(result, ns.json)
+
+    except Exception as e:
+        _err(str(e))
+
+
+# ── Content Dispatch ──────────────────────────────────────────────────────────
+
+def cmd_content_dispatch(args: list[str]) -> None:
+    from forge_ops import content_dispatch_engine
+    p = argparse.ArgumentParser(prog="forge_ops content-dispatch")
+    p.add_argument("command", choices=["refresh", "today", "next", "blocked", "mark-published"])
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--id", dest="asset_id", help="Asset ID to mark published")
+    p.add_argument("--url", dest="published_url", default=None, help="Published URL (optional)")
+    ns = p.parse_args(args)
+
+    try:
+        if ns.command == "refresh":
+            result = content_dispatch_engine.refresh()
+            if not ns.json:
+                print(f"  Phase: {result['phase']} | Date: {result['date']}")
+                print(f"  Total assets: {result['total_assets']}")
+                print(f"  Publishable today: {result['publishable_today']}")
+                print(f"  Blocked by links: {result['blocked_by_links']}")
+                print(f"  Needs prep: {result['needs_prep']}")
+                for label, path in result.get("files", {}).items():
+                    print(f"  {label}: {path}")
+            else:
+                _out(result, True)
+
+        elif ns.command == "today":
+            items = content_dispatch_engine.get_today()
+            if not ns.json:
+                if items:
+                    print(f"  {len(items)} item(s) ready to publish today:")
+                    for a in items:
+                        print(f"    {a['title']} [{a['channel']}]")
+                else:
+                    print("  Nothing publishable today.")
+            else:
+                _out(items, True)
+
+        elif ns.command == "next":
+            result = content_dispatch_engine.get_next()
+            if not ns.json:
+                for channel, item in result.items():
+                    if item:
+                        print(f"  {channel}: {item['title']} ({item['intended_date']}) -- {item['dispatch_status']}")
+                    else:
+                        print(f"  {channel}: nothing scheduled")
+            else:
+                _out(result, True)
+
+        elif ns.command == "blocked":
+            items = content_dispatch_engine.get_blocked()
+            if not ns.json:
+                if items:
+                    print(f"  {len(items)} item(s) blocked by missing links:")
+                    for a in items:
+                        print(f"    {a['title']} -- needs {a['cta_dependency']}")
+                else:
+                    print("  Nothing blocked.")
+            else:
+                _out(items, True)
+
+        elif ns.command == "mark-published":
+            if not ns.asset_id:
+                _err("--id required (use asset_id from dispatch manifest)")
+            result = content_dispatch_engine.mark_published(ns.asset_id, published_url=ns.published_url)
+            if not ns.json:
+                print(f"  Marked published: {ns.asset_id}")
+                if ns.published_url:
+                    print(f"  URL: {ns.published_url}")
+                print(f"  Dispatch refreshed. Phase: {result['phase']}")
+            else:
+                _out(result, True)
+
+    except Exception as e:
+        _err(str(e))
+
+
+# ── Mobile review ─────────────────────────────────────────────────────────
+
 def cmd_mobile_review(args: list[str]) -> None:
     from forge_ops import mobile_review_engine
     p = argparse.ArgumentParser(prog="forge_ops mobile-review")
@@ -386,6 +527,9 @@ def main() -> None:
         "approval": cmd_approval,
         "scorecard": cmd_scorecard,
         "mobile-review": cmd_mobile_review,
+        "review-intel": cmd_review_intel,
+        "repair-queue": cmd_repair_queue,
+        "content-dispatch": cmd_content_dispatch,
     }
 
     if engine not in dispatch:

@@ -122,6 +122,22 @@ function normalizeIssues(value) {
     : [];
 }
 
+const SCORE_DIMENSIONS = ['specificity', 'originality', 'voice_match', 'business_relevance', 'cta_clarity', 'visual_quality', 'ship_readiness'];
+
+function normalizeScores(value) {
+  if (!isObject(value)) return null;
+  const result = {};
+  let hasAny = false;
+  for (const dim of SCORE_DIMENSIONS) {
+    const raw = Number(value[dim]);
+    if (Number.isFinite(raw) && raw >= 1 && raw <= 5) {
+      result[dim] = Math.round(raw);
+      hasAny = true;
+    }
+  }
+  return hasAny ? result : null;
+}
+
 function ensureReviewsShape(reviews) {
   const base = isObject(reviews) ? reviews : {};
   return {
@@ -178,8 +194,8 @@ export async function handleCreateReviewEvent(request, env) {
     return jsonResponse({ error: 'item_id is required' }, 400);
   }
 
-  if (!['approve', 'needs_revision', 'reject'].includes(body.decision)) {
-    return jsonResponse({ error: 'decision must be approve, needs_revision, or reject' }, 400);
+  if (!['approve', 'needs_revision', 'reject', 'later'].includes(body.decision)) {
+    return jsonResponse({ error: 'decision must be approve, needs_revision, reject, or later' }, 400);
   }
 
   const state = await readState(env);
@@ -226,6 +242,27 @@ export async function handleCreateReviewEvent(request, env) {
     artifact_dimensions: typeof body.artifact_dimensions === 'string' ? body.artifact_dimensions : item.artifact_dimensions || null,
     is_overwritten_revision: body.is_overwritten_revision === true,
     resolved_at: body.decision === 'approve' ? (typeof body.resolved_at === 'string' && body.resolved_at ? body.resolved_at : new Date().toISOString()) : null,
+
+    // ── Revision Intelligence Layer (all optional, backward-compatible) ──
+    // Structured scoring: object with dimension keys and integer 1-5 values.
+    // Dimensions: specificity, originality, voice_match, business_relevance,
+    //             cta_clarity, visual_quality, ship_readiness
+    scores: isObject(body.scores) ? normalizeScores(body.scores) : null,
+
+    // Taxonomy-level reason tags (why it was revised/rejected).
+    // These are from the review-reason-taxonomy, not the UI issue checkboxes.
+    reason_tags: normalizeIssues(body.reason_tags),
+
+    // Positive pattern tags (why it was approved / what works).
+    strength_tags: normalizeIssues(body.strength_tags),
+
+    // One short sentence: the single most important fix or observation.
+    improvement_note: typeof body.improvement_note === 'string' ? body.improvement_note.trim().slice(0, 500) : '',
+
+    // What should happen next: none | update_template | create_example | add_guardrail | update_skill
+    template_action: ['none', 'update_template', 'create_example', 'add_guardrail', 'update_skill'].includes(body.template_action)
+      ? body.template_action
+      : 'none',
   };
 
   await env.STATE.put(`${EVENT_PREFIX}${event.event_id}`, JSON.stringify(event));
@@ -245,6 +282,17 @@ export async function handleCreateReviewEvent(request, env) {
 
   reviews.items[itemIndex] = updateReviewItemWithEvent(item, event);
   reviews.stats = recalculateReviewStats(reviews.items);
+
+  // Strip per-item metadata content on every write to prevent KV bloat.
+  // Sidecar content embedded in item.metadata (50-300KB per item) causes
+  // Worker read/write timeouts after repeated review decisions.
+  reviews.items = reviews.items.map((i) => {
+    if (!i.metadata) return i;
+    const stripped = { ...i };
+    delete stripped.metadata;
+    return stripped;
+  });
+
   state.reviews = reviews;
   state.lastUpdated = new Date().toISOString();
 
@@ -262,7 +310,7 @@ export async function handleListReviewEvents(request, env) {
   const url = new URL(request.url);
   const itemId = url.searchParams.get('item_id');
   const decision = url.searchParams.get('decision');
-  const limit = Math.max(1, Math.min(200, Number(url.searchParams.get('limit') || 50)));
+  const limit = Math.max(1, Math.min(500, Number(url.searchParams.get('limit') || 50)));
 
   const index = await readIndex(env);
   const filteredIndex = index
