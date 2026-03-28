@@ -52,7 +52,18 @@ docker compose -f ~/Forge/openclaw/docker-compose.yml restart
 
 Single source of truth: `~/Forge/.env`
 
-Keys OpenClaw uses: ANTHROPIC_API_KEY, SLACK_BOT_TOKEN, SLACK_APP_TOKEN, SLACK_WEBHOOK_*, SLACK_CHANNEL_*, N8N_BASE_URL, N8N_API_KEY, CF_ACCOUNT_ID, CF_API_TOKEN
+**After changing `.env`, you MUST recreate the container -- not just restart:**
+```bash
+docker compose up -d --force-recreate openclaw
+```
+`docker compose restart` does NOT reload env_file. The container keeps stale values.
+
+**Verify X auth after any credential change:**
+```bash
+./scripts/x-auth-doctor.sh
+```
+
+Keys OpenClaw uses: ANTHROPIC_API_KEY, SLACK_BOT_TOKEN, SLACK_APP_TOKEN, SLACK_WEBHOOK_*, SLACK_CHANNEL_*, N8N_BASE_URL, N8N_API_KEY, CF_ACCOUNT_ID, CF_API_TOKEN, FORGE_X_*
 
 Keys that stay in n8n only: SUPABASE_*, LINKEDIN_*, GITHUB_TOKEN, ARCHER_SECRET_TOKEN
 
